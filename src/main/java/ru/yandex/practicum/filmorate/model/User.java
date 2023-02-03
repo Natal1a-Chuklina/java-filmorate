@@ -12,11 +12,10 @@ import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 @Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 @ToString
 @Setter
 public class User {
-    @EqualsAndHashCode.Include
     private int id;
     @Email
     private String email;
@@ -30,7 +29,11 @@ public class User {
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
-        this.name = (name == null || name.isBlank()) ? login : name;
+        initName(login, name);
         this.birthday = birthday;
+    }
+
+    private void initName(String login, String name) {
+        this.name = (name == null || name.isBlank()) ? login : name;
     }
 }

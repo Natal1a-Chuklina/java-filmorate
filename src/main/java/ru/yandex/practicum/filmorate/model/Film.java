@@ -12,11 +12,10 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 @ToString
 @Setter
 public class Film {
-    @EqualsAndHashCode.Include
     private int id;
     @NotBlank
     private String name;

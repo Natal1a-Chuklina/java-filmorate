@@ -1,52 +1,62 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @Slf4j
 @RequestMapping("/films")
+@Validated
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int counter = 1;
+    private static final String DEFAULT_BEST_FILMS_COUNT = "10";
+
+    private final FilmService filmService;
+
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> getAll() {
-        log.info("Получен список фильмов длиной {}.", films.size());
-        return films.values();
+        return filmService.getAll();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            log.warn("Выполнена попытка добавить фильме с уже существующим id = {}.", film.getId());
-            throw new AlreadyExistException(String.format("Фильм с id = %d уже существует", film.getId()));
-        } else {
-            log.info("Добавлен фильм с id = {}.", counter);
-            film.setId(counter++);
-            films.put(film.getId(), film);
-            return film;
-        }
+        return filmService.createFilm(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            log.warn("Выполнена попытка обновить информацию о фильме с несуществующим id = {}.", film.getId());
-            throw new NotFoundException(String.format("Фильм с идентификатором %d не найден", film.getId()));
-        }
+        return filmService.updateFilm(film);
+    }
 
-        BeanUtils.copyProperties(film, films.get(film.getId()), "id");
-        log.info("Информация о фильме с id = {} обновлена.", film.getId());
-        return film;
+    @GetMapping("/{filmId}")
+    public Film getFilmById(@PathVariable int filmId) {
+        return filmService.getFilmById(filmId);
+    }
+
+    @PutMapping("/{filmId}/like/{userId}")
+    public void addLike(@PathVariable int filmId, @PathVariable int userId) {
+        filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public void deleteLike(@PathVariable int filmId, @PathVariable int userId) {
+        filmService.deleteLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
+                                       @Positive int count) {
+        return filmService.getBestFilmsList(count);
     }
 }

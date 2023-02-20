@@ -10,6 +10,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @EqualsAndHashCode
@@ -25,11 +27,21 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
+    private final List<Integer> likes;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        likes = new ArrayList<>();
+    }
+
+    public void addLike(int userId) {
+        likes.add(userId);
+    }
+
+    public void deleteLike(Integer userId) {
+        likes.remove(userId);
     }
 }

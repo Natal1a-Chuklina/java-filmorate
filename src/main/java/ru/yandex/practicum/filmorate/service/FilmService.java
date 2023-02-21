@@ -69,14 +69,13 @@ public class FilmService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
         }
 
-        if (filmStorage.getFilm(filmId).getLikes().contains(userId)) {
+        if (filmStorage.getFilm(filmId).addLike(userId)) {
+            log.info("Пользователь с id = {} поставил лайк фильму с id = {}", userId, filmId);
+        } else {
             log.warn("Выполнена попытка повторно поставить лайк фильму с id = {} пользователем с id = {}",
                     filmId, userId);
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LIKED_FILM_MESSAGE, userId, filmId));
         }
-
-        filmStorage.getFilm(filmId).addLike(userId);
-        log.info("Пользователь с id = {} поставил лайк фильму с id = {}", userId, filmId);
     }
 
     public void deleteLike(int filmId, int userId) {
@@ -88,14 +87,13 @@ public class FilmService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
         }
 
-        if (!filmStorage.getFilm(filmId).getLikes().contains(userId)) {
+        if (filmStorage.getFilm(filmId).deleteLike(userId)) {
+            log.info("Пользователь с id = {} удалил лайк у фильма с id = {}", userId, filmId);
+        } else {
             log.warn("Выполнена попытка удалить несущестующий лайк у фильма с id = {} пользователем с id = {}",
                     filmId, userId);
             throw new AlreadyExistException(String.format(Constants.USER_NOT_LIKED_FILM_MESSAGE, userId, filmId));
         }
-
-        filmStorage.getFilm(filmId).deleteLike(userId);
-        log.info("Пользователь с id = {} удалил лайк у фильма с id = {}", userId, filmId);
     }
 
     public List<Film> getBestFilmsList(int count) {

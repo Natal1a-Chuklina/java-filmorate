@@ -21,41 +21,49 @@ public class UserController {
 
     @GetMapping
     public Collection<User> getAll() {
+        log.info("Попытка получить список пользователей");
         return userService.getAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
+        log.info("Попытка создать пользователя: {}", user);
         return userService.createUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
+        log.info("Попытка обновить информацию о пользователе: {}", user);
         return userService.updateUser(user);
     }
 
     @GetMapping("/{userId}")
     public User getUserById(@PathVariable int userId) {
+        log.info("Попытка получить информацию о пользователе с id = {}", userId);
         return userService.getUserById(userId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable int userId, @PathVariable int friendId) {
+        log.info("Попытка добавить в друзья пользователю с id = {} пользователя с id = {}", userId, friendId);
         userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable int userId, @PathVariable int friendId) {
+        log.info("Попытка удалить из друзей пользователя с id = {} пользователя с id = {}", userId, friendId);
         userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{userId}/friends")
     public List<User> getFriendsList(@PathVariable int userId) {
+        log.info("Попытка получить список пользователей с id = {}", userId);
         return userService.getFriendsList(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
     public List<User> getSameFriendsList(@PathVariable int userId, @PathVariable int otherId) {
+        log.info("Попытка получить список общих друзей пользователей с id: {} и {}", userId, otherId);
         return userService.getSameFriendsList(userId, otherId);
     }
 }

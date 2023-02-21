@@ -62,7 +62,7 @@ class FilmServiceTest {
         filmService.createFilm(film1);
         filmService.createFilm(film2);
 
-        assertEquals(List.of(film1, film2), new ArrayList(filmService.getAll()));
+        assertEquals(List.of(film1, film2), new ArrayList<>(filmService.getAll()));
     }
 
     @Test
@@ -107,7 +107,7 @@ class FilmServiceTest {
         filmService.addLike(film1.getId(), user.getId());
 
         assertEquals(1, film1.getLikes().size());
-        assertEquals(user.getId(), film1.getLikes().get(0));
+        assertTrue(film1.getLikes().contains(user.getId()));
     }
 
     @Test

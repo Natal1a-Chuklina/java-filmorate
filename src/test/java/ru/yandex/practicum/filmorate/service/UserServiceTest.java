@@ -104,8 +104,8 @@ class UserServiceTest {
         assertEquals(1, user1.getFriends().size());
         assertEquals(1, user2.getFriends().size());
 
-        assertEquals(user2.getId(), user1.getFriends().get(0));
-        assertEquals(user1.getId(), user2.getFriends().get(0));
+        assertTrue(user1.getFriends().contains(user2.getId()));
+        assertTrue(user2.getFriends().contains(user1.getId()));
     }
 
     @Test

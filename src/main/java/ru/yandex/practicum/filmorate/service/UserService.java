@@ -71,16 +71,14 @@ public class UserService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, friendId));
         }
 
-        if (userStorage.getUser(userId).getFriends().contains(friendId)) {
+        if (userStorage.getUser(userId).addFriend(friendId) && userStorage.getUser(friendId).addFriend(userId)) {
+            log.info("Пользователь с id = {} добавил в друзья пользователя с id = {}", userId, friendId);
+        } else {
             log.warn("Выполнена попытка повторно добваить в друзья пользователю с id = {} пользователя с id = {}",
                     userId, friendId);
             throw new AlreadyExistException(String.format(Constants.USERS_ALREADY_FRIENDS_MESSAGE,
                     userId, friendId));
         }
-
-        userStorage.getUser(userId).addFriend(friendId);
-        userStorage.getUser(friendId).addFriend(userId);
-        log.info("Пользователь с id = {} добавил в друзья пользователя с id = {}", userId, friendId);
     }
 
     public void deleteFriend(int userId, int friendId) {
@@ -92,16 +90,14 @@ public class UserService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, friendId));
         }
 
-        if (!userStorage.getUser(userId).getFriends().contains(friendId)) {
+        if (userStorage.getUser(userId).deleteFriend(friendId) && userStorage.getUser(friendId).deleteFriend(userId)) {
+            log.info("Пользователь с id = {} удалил из друзей пользователя с id = {}", userId, friendId);
+        } else {
             log.warn("Выполнена попытка удалить из друзей пользователей, которые не являются друзьями id: {} и {}",
                     userId, friendId);
             throw new AlreadyExistException(String.format(Constants.USERS_NOT_FRIENDS_MESSAGE,
                     userId, friendId));
         }
-
-        userStorage.getUser(userId).deleteFriend(friendId);
-        userStorage.getUser(friendId).deleteFriend(userId);
-        log.info("Пользователь с id = {} удалил из друзей пользователя с id = {}", userId, friendId);
     }
 
     public List<User> getFriendsList(int userId) {

@@ -26,37 +26,44 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> getAll() {
+        log.info("Попытка получить список фильмов");
         return filmService.getAll();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
+        log.info("Попытка создать фильм: {}", film);
         return filmService.createFilm(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
+        log.info("Попытка обновить информацию о фильме: {}", film);
         return filmService.updateFilm(film);
     }
 
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable int filmId) {
+        log.info("Попытка получить информацию о фильме с id = {}", filmId);
         return filmService.getFilmById(filmId);
     }
 
     @PutMapping("/{filmId}/like/{userId}")
     public void addLike(@PathVariable int filmId, @PathVariable int userId) {
+        log.info("Попытка добавить лайк фильму с id = {} пользователем с id = {}", filmId, userId);
         filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
     public void deleteLike(@PathVariable int filmId, @PathVariable int userId) {
+        log.info("Попытка удалить лайк у фильма с id = {} пользователем с id = {}", filmId, userId);
         filmService.deleteLike(filmId, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
                                        @Positive int count) {
+        log.info("Попытка получить топ {} фильмов", count);
         return filmService.getBestFilmsList(count);
     }
 }

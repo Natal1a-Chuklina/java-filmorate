@@ -1,52 +1,69 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int counter = 1;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> getAll() {
-        log.info("Получен список пользователей длиной {}.", users.size());
-        return users.values();
+        log.info("Попытка получить список пользователей");
+        return userService.getAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            log.warn("Выполнена попытка добавить пользователя с уже существующим id = {}.", user.getId());
-            throw new AlreadyExistException(String.format("Пользователь с id = %d уже существует", user.getId()));
-        } else {
-            log.info("Добавлен пользователь с id = {}.", counter);
-            user.setId(counter++);
-            users.put(user.getId(), user);
-            return user;
-        }
+        log.info("Попытка создать пользователя: {}", user);
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            log.warn("Выполнена попытка обновить информацию о пользователе с несуществующим id = {}.", user.getId());
-            throw new NotFoundException(String.format("Пользователь с идентификатором %d не найден", user.getId()));
-        }
+        log.info("Попытка обновить информацию о пользователе: {}", user);
+        return userService.updateUser(user);
+    }
 
-        BeanUtils.copyProperties(user, users.get(user.getId()), "id");
-        log.info("Информация о пользователе с id = {} обновлена.", user.getId());
-        return user;
+    @GetMapping("/{userId}")
+    public User getUserById(@PathVariable int userId) {
+        log.info("Попытка получить информацию о пользователе с id = {}", userId);
+        return userService.getUserById(userId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable int userId, @PathVariable int friendId) {
+        log.info("Попытка добавить в друзья пользователю с id = {} пользователя с id = {}", userId, friendId);
+        userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int userId, @PathVariable int friendId) {
+        log.info("Попытка удалить из друзей пользователя с id = {} пользователя с id = {}", userId, friendId);
+        userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<User> getFriendsList(@PathVariable int userId) {
+        log.info("Попытка получить список пользователей с id = {}", userId);
+        return userService.getFriendsList(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    public List<User> getSameFriendsList(@PathVariable int userId, @PathVariable int otherId) {
+        log.info("Попытка получить список общих друзей пользователей с id: {} и {}", userId, otherId);
+        return userService.getSameFriendsList(userId, otherId);
     }
 }

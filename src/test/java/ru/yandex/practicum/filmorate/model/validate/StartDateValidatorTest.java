@@ -12,10 +12,10 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StartDateValidatorTest {
-    private static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
-    public void testValidationWhenDateIsCorrect() {
+    void testValidationWhenDateIsCorrect() {
         Film film = new Film("name", "description", LocalDate.of(1999, 3, 31),
                 120);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
@@ -24,7 +24,7 @@ class StartDateValidatorTest {
     }
 
     @Test
-    public void testValidationWhenDateIsIncorrect() {
+    void testValidationWhenDateIsIncorrect() {
         Film film = new Film("name", "description", LocalDate.of(1799, 3, 31),
                 120);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);

@@ -247,7 +247,7 @@ class FilmorateApplicationTests {
         assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .as("Проверка добавления пользователя с некорректными данными (null где нельзя). %s", request)
                 .isThrownBy(() -> userStorage.add(request))
-                .withMessageContaining("Значение NULL не разрешено для поля");
+                .withMessageContaining("NULL not allowed for column");
 
     }
 
@@ -319,7 +319,7 @@ class FilmorateApplicationTests {
                 .as("Проверка обновления пользователя некорректными данными (null где нельзя) %s"
                         , updateUserRequest)
                 .isThrownBy(() -> userStorage.update(updateUserRequest))
-                .withMessageContaining("Значение NULL не разрешено для поля");
+                .withMessageContaining("NULL not allowed for column");
     }
 
     @Test
@@ -426,7 +426,7 @@ class FilmorateApplicationTests {
         assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .as("Проверка добавления в друзья несуществующего пользователя")
                 .isThrownBy(() -> userStorage.addFriend(userIdAdded, userIdAdded + 1, Status.CONFIRMED))
-                .withMessageContaining("Нарушение ссылочной целостности");
+                .withMessageContaining("Referential integrity constraint violation");
     }
 
     @Test
@@ -918,7 +918,7 @@ class FilmorateApplicationTests {
         assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .as("Проверка добавления лайка несуществующему фильму")
                 .isThrownBy(() -> filmStorage.addLike(1, userIdAdded))
-                .withMessageContaining("Нарушение ссылочной целостности");
+                .withMessageContaining("Referential integrity constraint violation");
     }
 
     @Test
@@ -936,7 +936,7 @@ class FilmorateApplicationTests {
         assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .as("Проверка добавления лайка несуществующим пользователем")
                 .isThrownBy(() -> filmStorage.addLike(filmId, 1))
-                .withMessageContaining("Нарушение ссылочной целостности");
+                .withMessageContaining("Referential integrity constraint violation");
     }
 
     @Test

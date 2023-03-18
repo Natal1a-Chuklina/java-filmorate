@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -7,11 +9,19 @@ import java.util.Collection;
 public interface FilmStorage {
     Collection<Film> getAll();
 
-    boolean isFilmExist(int filmId);
+    boolean isFilmExists(int filmId);
 
-    void add(Film film);
+    boolean isFilmContainsUserLike(int filmId, int userId);
 
-    void update(Film film);
+    int add(CreateFilmRequest film);
+
+    void update(UpdateFilmRequest film);
 
     Film getFilm(int filmId);
+
+    void addLike(int filmId, int userId);
+
+    void deleteLike(int filmId, int userId);
+
+    Collection<Film> getBestFilms(int count);
 }

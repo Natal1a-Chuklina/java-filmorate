@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.FilmResponse;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -17,7 +19,6 @@ import java.util.List;
 @Validated
 public class FilmController {
     private static final String DEFAULT_BEST_FILMS_COUNT = "10";
-
     private final FilmService filmService;
 
     public FilmController(FilmService filmService) {
@@ -25,25 +26,25 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> getAll() {
+    public Collection<FilmResponse> getAll() {
         log.info("Попытка получить список фильмов");
         return filmService.getAll();
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
+    public FilmResponse create(@Valid @RequestBody CreateFilmRequest film) {
         log.info("Попытка создать фильм: {}", film);
         return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
+    public FilmResponse update(@Valid @RequestBody UpdateFilmRequest film) {
         log.info("Попытка обновить информацию о фильме: {}", film);
         return filmService.updateFilm(film);
     }
 
     @GetMapping("/{filmId}")
-    public Film getFilmById(@PathVariable int filmId) {
+    public FilmResponse getFilmById(@PathVariable int filmId) {
         log.info("Попытка получить информацию о фильме с id = {}", filmId);
         return filmService.getFilmById(filmId);
     }
@@ -61,8 +62,8 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
-                                       @Positive int count) {
+    public List<FilmResponse> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
+                                               @Positive int count) {
         log.info("Попытка получить топ {} фильмов", count);
         return filmService.getBestFilmsList(count);
     }

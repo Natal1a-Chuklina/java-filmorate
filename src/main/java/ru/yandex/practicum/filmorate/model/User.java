@@ -5,13 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @EqualsAndHashCode
@@ -19,33 +15,26 @@ import java.util.Set;
 @Setter
 public class User {
     private int id;
-    @Email
     private String email;
-    @NotBlank
-    @Pattern(regexp = "^\\S+$")
     private String login;
     private String name;
-    @Past
     private LocalDate birthday;
-    private final Set<Integer> friends;
+    private final Map<Integer, Status> friends;
 
-    public User(String email, String login, String name, LocalDate birthday) {
+    public User(int id, String email, String login, String name, LocalDate birthday) {
+        this.id = id;
         this.email = email;
         this.login = login;
-        initName(login, name);
+        this.name = name;
         this.birthday = birthday;
-        friends = new HashSet<>();
+        friends = new HashMap<>();
     }
 
-    private void initName(String login, String name) {
-        this.name = (name == null || name.isBlank()) ? login : name;
+    public void addFriend(int friendId, Status status) {
+        friends.put(friendId, status);
     }
 
-    public boolean addFriend(int friendId) {
-        return friends.add(friendId);
-    }
-
-    public boolean deleteFriend(Integer friendId) {
-        return friends.remove(friendId);
+    public void deleteFriend(Integer friendId) {
+        friends.remove(friendId);
     }
 }

@@ -11,6 +11,10 @@ public class Constants {
     public static final String USER_COULD_NOT_ADD_HIMSELF_TO_FRIEND = "Пользователь не может добавить сам себя в друзья";
     public static final String GENRE_NOT_FOUND_MESSAGE = "Жанр с идентификатором %d не найден";
     public static final String RATING_NOT_FOUND_MESSAGE = "Рейтинг с идентификатором %d не найден";
+    public static final String UNKNOWN_ERROR_MESSAGE = "Произошла неизвестная ошибка, попробуйте проверить корректность " +
+            "всех данных запроса";
+    public static final String FILM_ALREADY_EXISTS_MESSAGE = "Фильм с такими именем, описанием, датой релиза и" +
+            " длительностью уже существует";
 
     private Constants() {
     }

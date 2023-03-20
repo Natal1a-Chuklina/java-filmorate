@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.FilmResponse;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -26,25 +24,25 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<FilmResponse> getAll() {
+    public Collection<Film> getAll() {
         log.info("Попытка получить список фильмов");
         return filmService.getAll();
     }
 
     @PostMapping
-    public FilmResponse create(@Valid @RequestBody CreateFilmRequest film) {
+    public Film create(@Valid @RequestBody Film film) {
         log.info("Попытка создать фильм: {}", film);
         return filmService.createFilm(film);
     }
 
     @PutMapping
-    public FilmResponse update(@Valid @RequestBody UpdateFilmRequest film) {
+    public Film update(@Valid @RequestBody Film film) {
         log.info("Попытка обновить информацию о фильме: {}", film);
         return filmService.updateFilm(film);
     }
 
     @GetMapping("/{filmId}")
-    public FilmResponse getFilmById(@PathVariable int filmId) {
+    public Film getFilmById(@PathVariable int filmId) {
         log.info("Попытка получить информацию о фильме с id = {}", filmId);
         return filmService.getFilmById(filmId);
     }
@@ -62,8 +60,8 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<FilmResponse> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
-                                               @Positive int count) {
+    public List<Film> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
+                                       @Positive int count) {
         log.info("Попытка получить топ {} фильмов", count);
         return filmService.getBestFilmsList(count);
     }

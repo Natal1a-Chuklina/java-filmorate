@@ -6,8 +6,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -42,11 +40,13 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data " +
+                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
                         "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                        "LEFT JOIN likes AS l ON f.id = l.film_id " +
                         "GROUP BY f.id;";
 
         log.info("Получен список всех фильмов из базы");
@@ -71,7 +71,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public int add(CreateFilmRequest film) {
+    public int add(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("id");
@@ -86,7 +86,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void update(UpdateFilmRequest film) {
+    public void update(Film film) {
         String sql =
                 "UPDATE films " +
                         "SET name = ?, " +
@@ -121,11 +121,13 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data " +
+                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
                         "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                        "LEFT JOIN likes AS l ON f.id = l.film_id " +
                         "WHERE f.id = ? " +
                         "GROUP BY f.id;";
 
@@ -165,7 +167,8 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data " +
+                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +

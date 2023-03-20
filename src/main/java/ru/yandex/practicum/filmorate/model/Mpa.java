@@ -2,7 +2,8 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -11,7 +12,8 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode
 @ToString
 public class Mpa {
-    @NotNull
+    @Min(value = 1)
+    @Max(value = 5)
     private int id;
     private String name;
 }

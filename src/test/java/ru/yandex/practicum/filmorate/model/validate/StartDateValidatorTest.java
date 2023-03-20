@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.model.validate;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -16,18 +17,20 @@ class StartDateValidatorTest {
 
     @Test
     void testValidationWhenDateIsCorrect() {
-        CreateFilmRequest film = new CreateFilmRequest("name", "description", LocalDate.of(1999, 3, 31),
-                120);
-        Set<ConstraintViolation<CreateFilmRequest>> violations = validator.validate(film);
+        Mpa mpa = new Mpa(1, "G");
+        Film film = new Film("name", "description", LocalDate.of(1999, 3, 31),
+                120, mpa);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertEquals(0, violations.size());
     }
 
     @Test
     void testValidationWhenDateIsIncorrect() {
-        CreateFilmRequest film = new CreateFilmRequest("name", "description", LocalDate.of(1799, 3, 31),
-                120);
-        Set<ConstraintViolation<CreateFilmRequest>> violations = validator.validate(film);
+        Mpa mpa = new Mpa(1, "G");
+        Film film = new Film("name", "description", LocalDate.of(1799, 3, 31),
+                120, mpa);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
 
         assertEquals(1, violations.size());
     }

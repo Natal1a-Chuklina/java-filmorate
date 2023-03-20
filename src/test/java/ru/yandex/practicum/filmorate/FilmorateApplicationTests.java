@@ -11,10 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.jdbc.Sql;
-import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.user.CreateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
@@ -37,7 +33,7 @@ class FilmorateApplicationTests {
     private final MpaDbStorage mpaStorage;
 
     private int createUserInDb(String email, String login, String name, LocalDate birthday) {
-        CreateUserRequest correctAddUserRequest = new CreateUserRequest(
+        User correctAddUserRequest = new User(
                 email,
                 login,
                 name,
@@ -228,26 +224,27 @@ class FilmorateApplicationTests {
         }).doesNotThrowAnyException();
     }
 
-    static Stream<CreateUserRequest> wrongUserRequestsStream() {
-        CreateUserRequest nullEmailRequest
-                = new CreateUserRequest(null, "login", "name", LocalDate.now());
-        CreateUserRequest nullLoginRequest
-                = new CreateUserRequest("email", null, "name", LocalDate.now());
-        CreateUserRequest nullNameRequest
-                = new CreateUserRequest("email", "login", null, LocalDate.now());
+    static Stream<User> wrongUserRequestsStream() {
+        User nullEmailRequest
+                = new User(null, "login", "name", LocalDate.now());
+        User nullLoginRequest
+                = new User("email", null, "name", LocalDate.now());
+        User nullNameRequest
+                = new User("email", "login", null, LocalDate.now());
+        User birthdayInFutureRequest
+                = new User("email", "login", "name", LocalDate.of(5000, 1, 1));
 
-        return Stream.of(nullEmailRequest, nullLoginRequest, nullNameRequest);
+        return Stream.of(nullEmailRequest, nullLoginRequest, nullNameRequest, birthdayInFutureRequest);
 
     }
 
     @ParameterizedTest
     @MethodSource("wrongUserRequestsStream")
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void testAddingOfIncorrectUser(CreateUserRequest request) {
+    void testAddingOfIncorrectUser(User request) {
         assertThatExceptionOfType(DataIntegrityViolationException.class)
-                .as("Проверка добавления пользователя с некорректными данными (null где нельзя). %s", request)
-                .isThrownBy(() -> userStorage.add(request))
-                .withMessageContaining("NULL not allowed for column");
+                .as("Проверка добавления пользователя с некорректными данными. %s", request)
+                .isThrownBy(() -> userStorage.add(request));
 
     }
 
@@ -275,7 +272,7 @@ class FilmorateApplicationTests {
                 .hasFieldOrPropertyWithValue("name", oldName)
                 .hasFieldOrPropertyWithValue("birthday", oldDate);
 
-        UpdateUserRequest updateUserRequest = new UpdateUserRequest(userId, newEmail, newLogin, newName, newDate);
+        User updateUserRequest = new User(userId, newEmail, newLogin, newName, newDate);
 
         assertThatCode(() -> userStorage.update(updateUserRequest))
                 .doesNotThrowAnyException();
@@ -292,13 +289,13 @@ class FilmorateApplicationTests {
                 .hasFieldOrPropertyWithValue("birthday", newDate);
     }
 
-    static Stream<UpdateUserRequest> wrongUpdateRequestsStream() {
-        UpdateUserRequest nullEmailRequest
-                = new UpdateUserRequest(0, null, "login", "name", LocalDate.now());
-        UpdateUserRequest nullLoginRequest
-                = new UpdateUserRequest(0, "email", null, "name", LocalDate.now());
-        UpdateUserRequest nullNameRequest
-                = new UpdateUserRequest(0, "email", "login", null, LocalDate.now());
+    static Stream<User> wrongUpdateRequestsStream() {
+        User nullEmailRequest
+                = new User(0, null, "login", "name", LocalDate.now());
+        User nullLoginRequest
+                = new User(0, "email", null, "name", LocalDate.now());
+        User nullNameRequest
+                = new User(0, "email", "login", null, LocalDate.now());
 
         return Stream.of(nullEmailRequest, nullLoginRequest, nullNameRequest);
     }
@@ -306,7 +303,7 @@ class FilmorateApplicationTests {
     @ParameterizedTest
     @MethodSource("wrongUpdateRequestsStream")
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void testIncorrectUserUpdating(UpdateUserRequest updateUserRequest) {
+    void testIncorrectUserUpdating(User updateUserRequest) {
         String email = "email@mail.ru";
         String login = "login";
         String name = "name";
@@ -590,15 +587,15 @@ class FilmorateApplicationTests {
     }
 
     private int createFilmInDb(String name, String description, LocalDate releaseDate,
-                               int duration, Mpa mpa, List<Genre> genres) {
-        CreateFilmRequest addFilmRequest = new CreateFilmRequest(
+                               int duration, Mpa mpa, Set<Genre> genres) {
+        Film addFilmRequest = new Film(
                 name,
                 description,
                 releaseDate,
-                duration
+                duration,
+                mpa
         );
 
-        addFilmRequest.setMpa(mpa);
         addFilmRequest.setGenres(new HashSet<>(genres));
 
         return filmStorage.add(addFilmRequest);
@@ -625,14 +622,14 @@ class FilmorateApplicationTests {
         LocalDate releaseDate1 = LocalDate.now();
         int duration1 = 120;
         Mpa mpa1 = new Mpa(1, "G");
-        List<Genre> genres1 = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres1 = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         String name2 = "name2";
         String description2 = "description2";
         LocalDate releaseDate2 = LocalDate.now();
         int duration2 = 32;
         Mpa mpa2 = new Mpa(1, "G");
-        List<Genre> genres2 = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres2 = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         assertThatCode(() -> {
             int film1IdAdded = createFilmInDb(name1, description1, releaseDate1, duration1, mpa1, genres1);
@@ -641,11 +638,9 @@ class FilmorateApplicationTests {
             Collection<Film> allFilmsFromDb = filmStorage.getAll();
 
             Film expectedFilm1 = new Film(film1IdAdded, name1, description1, releaseDate1, duration1, mpa1);
-            expectedFilm1.setMpa(mpa1);
             expectedFilm1.setGenres(genres1);
 
             Film expectedFilm2 = new Film(film2IdAdded, name2, description2, releaseDate2, duration2, mpa2);
-            expectedFilm2.setMpa(mpa2);
             expectedFilm2.setGenres(genres2);
 
             assertThat(allFilmsFromDb)
@@ -678,7 +673,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         assertThatCode(() -> {
             int filmIdAdded = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
@@ -698,7 +693,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int userId = 1;
 
@@ -720,7 +715,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         String email = "email@mail.ru";
         String login = "login";
@@ -747,10 +742,10 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         assertThatCode(() -> {
-            int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
+            int filmId = (createFilmInDb(name, description, releaseDate, duration, mpa, genres));
 
             assertThat(filmId)
                     .as("Проверка получения id добавленного фильма в бд")
@@ -769,8 +764,7 @@ class FilmorateApplicationTests {
                     .hasFieldOrPropertyWithValue("mpa", mpa);
 
             assertThat(filmFromDb.getGenres())
-                    .asList()
-                    .containsExactlyElementsOf(genres);
+                    .isEqualTo(genres);
         }).doesNotThrowAnyException();
     }
 
@@ -782,7 +776,7 @@ class FilmorateApplicationTests {
         LocalDate oldReleaseDate = LocalDate.now();
         int oldDuration = 60;
         Mpa oldMpa = new Mpa(1, "G");
-        List<Genre> oldGenres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> oldGenres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int filmId = createFilmInDb(oldName, oldDescription, oldReleaseDate, oldDuration, oldMpa, oldGenres);
 
@@ -805,11 +799,9 @@ class FilmorateApplicationTests {
                 .hasFieldOrPropertyWithValue("duration", oldDuration)
                 .hasFieldOrPropertyWithValue("mpa", oldMpa);
         assertThat(film.getGenres())
-                .asList()
-                .containsExactlyElementsOf(oldGenres);
+                .isEqualTo(oldGenres);
 
-        UpdateFilmRequest updateUserRequest = new UpdateFilmRequest(filmId, newName, newDescription, newReleaseDate, newDuration);
-        updateUserRequest.setMpa(newMpa);
+        Film updateUserRequest = new Film(filmId, newName, newDescription, newReleaseDate, newDuration, newMpa);
         updateUserRequest.setGenres(newGenres);
 
 
@@ -828,25 +820,28 @@ class FilmorateApplicationTests {
                 .hasFieldOrPropertyWithValue("duration", newDuration)
                 .hasFieldOrPropertyWithValue("mpa", newMpa);
         assertThat(film.getGenres())
-                .asList()
-                .containsExactlyElementsOf(newGenres);
+                .isEqualTo(newGenres);
     }
 
-    static Stream<UpdateFilmRequest> wrongFilmUpdateRequestsStream() {
-        UpdateFilmRequest fullNullRequest = new UpdateFilmRequest(-1, null, null, null, -1);
-        UpdateFilmRequest null1Request = new UpdateFilmRequest(-1, null, "description", LocalDate.now(), 30);
-        UpdateFilmRequest null2Request = new UpdateFilmRequest(-1, "name", null, LocalDate.now(), 30);
-        UpdateFilmRequest null3Request = new UpdateFilmRequest(-1, "name", "description", null, 30);
+    static Stream<Film> wrongFilmUpdateRequestsStream() {
+        Mpa mpa = new Mpa(1, "G");
 
-        return Stream.of(fullNullRequest, null1Request, null2Request, null3Request);
+        Film fullNullRequest = new Film(-1, null, null, null, -1, mpa);
+        Film null1Request = new Film(-1, null, "description", LocalDate.now(), 30, mpa);
+        Film null2Request = new Film(-1, "name", "description", LocalDate.now(), 30,
+                new Mpa(0, null));
+        Film incorrectDurationRequest = new Film(-1, "name", "description", LocalDate.now(),
+                -30, mpa);
+
+        return Stream.of(fullNullRequest, null1Request, null2Request, incorrectDurationRequest);
     }
 
     @ParameterizedTest
     @MethodSource("wrongFilmUpdateRequestsStream")
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void testIncorrectFilmUpdating(UpdateFilmRequest updateFilmRequest) {
-        assertThatExceptionOfType(NullPointerException.class)
-                .as("Проверка обновления фильма некорректными данными (null где нельзя) %s"
+    void testIncorrectFilmUpdating(Film updateFilmRequest) {
+        assertThatExceptionOfType(DataIntegrityViolationException.class)
+                .as("Проверка обновления фильма некорректными данными %s"
                         , updateFilmRequest)
                 .isThrownBy(() -> {
                     int filmId = createFilmInDb(
@@ -855,7 +850,7 @@ class FilmorateApplicationTests {
                             updateFilmRequest.getReleaseDate(),
                             updateFilmRequest.getDuration(),
                             updateFilmRequest.getMpa(),
-                            new ArrayList<>(updateFilmRequest.getGenres()));
+                            new LinkedHashSet<>(updateFilmRequest.getGenres()));
 
                     updateFilmRequest.setId(filmId);
 
@@ -871,7 +866,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
 
@@ -889,7 +884,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
 
@@ -900,9 +895,7 @@ class FilmorateApplicationTests {
 
         int userId = createUserInDb(email, login, userName, birthday);
 
-        assertThatCode(() -> {
-            filmStorage.addLike(filmId, userId);
-        }).doesNotThrowAnyException();
+        assertThatCode(() -> filmStorage.addLike(filmId, userId)).doesNotThrowAnyException();
     }
 
     @Test
@@ -929,7 +922,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
 
@@ -947,7 +940,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
 
@@ -972,7 +965,7 @@ class FilmorateApplicationTests {
         LocalDate releaseDate = LocalDate.now();
         int duration = 120;
         Mpa mpa = new Mpa(1, "G");
-        List<Genre> genres = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
 
@@ -1011,14 +1004,15 @@ class FilmorateApplicationTests {
         LocalDate releaseDate1 = LocalDate.now();
         int duration1 = 120;
         Mpa mpa1 = new Mpa(1, "G");
-        List<Genre> genres1 = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres1 = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         String name2 = "nameC";
         String description2 = "description2";
         LocalDate releaseDate2 = LocalDate.now();
         int duration2 = 32;
         Mpa mpa2 = new Mpa(1, "G");
-        List<Genre> genres2 = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres2 = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
+
 
         String email = "email@mail.ru";
         String login = "login";
@@ -1036,12 +1030,11 @@ class FilmorateApplicationTests {
             Collection<Film> allFilmsFromDb = filmStorage.getBestFilms(10);
 
             Film expectedFilm1 = new Film(film1IdAdded, name1, description1, releaseDate1, duration1, mpa1);
-            expectedFilm1.setMpa(mpa1);
             expectedFilm1.setGenres(genres1);
 
             Film expectedFilm2 = new Film(film2IdAdded, name2, description2, releaseDate2, duration2, mpa2);
-            expectedFilm2.setMpa(mpa2);
             expectedFilm2.setGenres(genres2);
+            expectedFilm2.addLike(userId);
 
             assertThat(allFilmsFromDb)
                     .as("Проверка получения непустого списка лучших фильмов отсортированного по количеству" +
@@ -1053,6 +1046,7 @@ class FilmorateApplicationTests {
                     .contains(expectedFilm2, Index.atIndex(0));
 
             filmStorage.deleteLike(film2IdAdded, userId);
+            expectedFilm2.deleteLike(userId);
 
             allFilmsFromDb = filmStorage.getBestFilms(10);
 
@@ -1075,14 +1069,14 @@ class FilmorateApplicationTests {
         LocalDate releaseDate1 = LocalDate.now();
         int duration1 = 120;
         Mpa mpa1 = new Mpa(1, "G");
-        List<Genre> genres1 = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres1 = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         String name2 = "nameC";
         String description2 = "description2";
         LocalDate releaseDate2 = LocalDate.now();
         int duration2 = 32;
         Mpa mpa2 = new Mpa(1, "G");
-        List<Genre> genres2 = List.of(new Genre(1, "Комедия"));
+        Set<Genre> genres2 = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
 
         assertThatCode(() -> {
             int film1IdAdded = createFilmInDb(name1, description1, releaseDate1, duration1, mpa1, genres1);
@@ -1091,11 +1085,9 @@ class FilmorateApplicationTests {
             Collection<Film> allFilmsFromDb = filmStorage.getBestFilms(10);
 
             Film expectedFilm1 = new Film(film1IdAdded, name1, description1, releaseDate1, duration1, mpa1);
-            expectedFilm1.setMpa(mpa1);
             expectedFilm1.setGenres(genres1);
 
             Film expectedFilm2 = new Film(film2IdAdded, name2, description2, releaseDate2, duration2, mpa2);
-            expectedFilm2.setMpa(mpa2);
             expectedFilm2.setGenres(genres2);
 
             assertThat(allFilmsFromDb)

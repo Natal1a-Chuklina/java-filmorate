@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Component
 public class FilmMapper implements RowMapper<Film> {
 
-    private static final int GENRES_DATA_COLUMN = 2;
+    private static final int DATA_COLUMN = 2;
 
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -30,7 +30,7 @@ public class FilmMapper implements RowMapper<Film> {
 
         ResultSet genresDataResultSet = rs.getArray("genres_data").getResultSet();
         while (genresDataResultSet.next()) {
-            String genreData = genresDataResultSet.getString(GENRES_DATA_COLUMN);
+            String genreData = genresDataResultSet.getString(DATA_COLUMN);
 
             if (genreData == null) {
                 break;
@@ -44,6 +44,21 @@ public class FilmMapper implements RowMapper<Film> {
         }
 
         genresDataResultSet.close();
+
+        ResultSet likesDataResultSet = rs.getArray("likes_data").getResultSet();
+        while (likesDataResultSet.next()) {
+            String likesData = likesDataResultSet.getString(DATA_COLUMN);
+
+            if (likesData == null) {
+                break;
+            }
+
+            int userId = Integer.parseInt(likesData);
+
+            film.addLike(userId);
+        }
+
+        likesDataResultSet.close();
 
         return film;
     }

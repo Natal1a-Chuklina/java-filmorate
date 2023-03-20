@@ -4,18 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
-import ru.yandex.practicum.filmorate.dto.user.CreateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UserResponse;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Status;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.Constants.USER_COULD_NOT_ADD_HIMSELF_TO_FRIEND;
 
@@ -28,64 +25,44 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public Collection<UserResponse> getAll() {
-        return userStorage.getAll().stream()
-                .map(this::createUserResponse)
-                .collect(Collectors.toList());
+    public Collection<User> getAll() {
+        return userStorage.getAll();
     }
 
-    private UserResponse createUserResponse(User user) {
-        return new UserResponse(user.getId(), user.getEmail(), user.getLogin(), user.getName(),
-                user.getBirthday());
-    }
-
-    private UserResponse createUserResponse(CreateUserRequest user, int userId) {
-        return new UserResponse(userId, user.getEmail(), user.getLogin(), user.getName(),
-                user.getBirthday());
-    }
-
-    private UserResponse createUserResponse(UpdateUserRequest user) {
-        return new UserResponse(user.getId(), user.getEmail(), user.getLogin(), user.getName(),
-                user.getBirthday());
-    }
-
-    public UserResponse createUser(CreateUserRequest user) {
+    public User createUser(User user) {
         checkUserName(user);
 
         if (userStorage.isUserExistsByEmail(user.getEmail())) {
             log.warn("Выполнена попытка добавить пользователя с уже существующей почтой {}.", user.getEmail());
             throw new AlreadyExistException(String.format(Constants.EMAIL_ALREADY_EXISTS_MESSAGE, user.getEmail()));
         } else {
-            int id = userStorage.add(user);
-            return createUserResponse(user, id);
+            return userStorage.getUser(userStorage.add(user));
         }
     }
 
-    private void checkUserName(CreateUserRequest user) {
+    private void checkUserName(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
     }
 
-    public UserResponse updateUser(UpdateUserRequest user) {
+    public User updateUser(User user) {
         if (!userStorage.isUserExistsById(user.getId())) {
             log.warn("Выполнена попытка обновить информацию о пользователе с несуществующим id = {}.", user.getId());
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, user.getId()));
         }
 
         userStorage.update(user);
-        return createUserResponse(user);
+        return userStorage.getUser(user.getId());
     }
 
-    public UserResponse getUserById(int userId) {
+    public User getUserById(int userId) {
         if (!userStorage.isUserExistsById(userId)) {
             log.warn("Выполнена попытка получить пользователя по несущестующему id = {}", userId);
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
         }
 
-        User user = userStorage.getUser(userId);
-
-        return createUserResponse(user);
+        return userStorage.getUser(userId);
     }
 
     public void addFriend(int userId, int friendId) {
@@ -131,18 +108,16 @@ public class UserService {
         }
     }
 
-    public List<UserResponse> getFriendsList(int userId) {
+    public List<User> getFriendsList(int userId) {
         if (!userStorage.isUserExistsById(userId)) {
             log.warn("Выполнена попытка получить список друзей пользователя с несуществующим id = {}.", userId);
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
         }
 
-        return userStorage.getFriends(userId).stream()
-                .map(this::createUserResponse)
-                .collect(Collectors.toList());
+        return new ArrayList<>(userStorage.getFriends(userId));
     }
 
-    public List<UserResponse> getSameFriendsList(int userId, int otherId) {
+    public List<User> getSameFriendsList(int userId, int otherId) {
         if (!userStorage.isUserExistsById(userId)) {
             log.warn("Выполнена попытка получить список общих друзей пользователя с несуществующим id = {}.", userId);
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
@@ -151,8 +126,6 @@ public class UserService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, otherId));
         }
 
-        return userStorage.getCommonFriends(userId, otherId).stream()
-                .map(this::createUserResponse)
-                .collect(Collectors.toList());
+        return new ArrayList<>(userStorage.getCommonFriends(userId, otherId));
     }
 }

@@ -1,7 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -13,9 +11,9 @@ public interface FilmStorage {
 
     boolean isFilmContainsUserLike(int filmId, int userId);
 
-    int add(CreateFilmRequest film);
+    int add(Film film);
 
-    void update(UpdateFilmRequest film);
+    void update(Film film);
 
     Film getFilm(int filmId);
 

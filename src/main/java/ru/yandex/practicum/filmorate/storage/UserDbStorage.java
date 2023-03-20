@@ -6,8 +6,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dto.user.CreateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.model.Status;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -74,7 +72,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public int add(CreateUserRequest user) {
+    public int add(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
@@ -86,7 +84,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void update(UpdateUserRequest user) {
+    public void update(User user) {
         String sql =
                 "UPDATE users " +
                         "SET email = ?, " +

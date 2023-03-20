@@ -3,9 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
-import ru.yandex.practicum.filmorate.dto.film.CreateFilmRequest;
-import ru.yandex.practicum.filmorate.dto.film.FilmResponse;
-import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -18,9 +15,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -38,67 +33,31 @@ public class FilmService {
         this.mpaStorage = mpaStorage;
     }
 
-    public Collection<FilmResponse> getAll() {
-        return filmStorage.getAll().stream()
-                .map(this::createFilmResponse)
-                .collect(Collectors.toList());
+    public Collection<Film> getAll() {
+        return filmStorage.getAll();
     }
 
-    public FilmResponse createFilm(CreateFilmRequest film) {
-        int filmId = filmStorage.add(film);
-        return createFilmResponse(film, filmId);
+    public Film createFilm(Film film) {
+        return filmStorage.getFilm(filmStorage.add(film));
     }
 
-    private FilmResponse createFilmResponse(Film film) {
-        FilmResponse filmResponse = new FilmResponse(film.getId(), film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration(), film.getMpa());
-
-        for (Genre genre : film.getGenres()) {
-            filmResponse.addGenre(genre);
-        }
-
-        return filmResponse;
-    }
-
-    private FilmResponse createFilmResponse(CreateFilmRequest film, int filmId) {
-        FilmResponse filmResponse = new FilmResponse(filmId, film.getName(), film.getDescription(), film.getReleaseDate(),
-                film.getDuration(), film.getMpa());
-
-        filmResponse.setGenres(film.getGenres().stream()
-                .sorted(Comparator.comparingInt(Genre::getId))
-                .collect(Collectors.toList()));
-
-        return filmResponse;
-    }
-
-    private FilmResponse createFilmResponse(UpdateFilmRequest film) {
-        FilmResponse filmResponse = new FilmResponse(film.getId(), film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration(), film.getMpa());
-
-        filmResponse.setGenres(film.getGenres().stream()
-                .sorted(Comparator.comparingInt(Genre::getId))
-                .collect(Collectors.toList()));
-
-        return filmResponse;
-    }
-
-    public FilmResponse updateFilm(UpdateFilmRequest film) {
+    public Film updateFilm(Film film) {
         if (!filmStorage.isFilmExists(film.getId())) {
             log.warn("Выполнена попытка обновить информацию о фильме с несуществующим id = {}.", film.getId());
             throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, film.getId()));
         }
 
         filmStorage.update(film);
-        return createFilmResponse(film);
+        return filmStorage.getFilm(film.getId());
     }
 
-    public FilmResponse getFilmById(int filmId) {
+    public Film getFilmById(int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn("Выполнена попытка получить фильм по несущестующему id = {}", filmId);
             throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
         }
 
-        return createFilmResponse(filmStorage.getFilm(filmId));
+        return filmStorage.getFilm(filmId);
     }
 
     public void addLike(int filmId, int userId) {
@@ -137,10 +96,8 @@ public class FilmService {
         }
     }
 
-    public List<FilmResponse> getBestFilmsList(int count) {
-        return filmStorage.getBestFilms(count).stream()
-                .map(this::createFilmResponse)
-                .collect(Collectors.toList());
+    public List<Film> getBestFilmsList(int count) {
+        return new ArrayList<>(filmStorage.getBestFilms(count));
     }
 
     public List<Genre> getAllGenres() {

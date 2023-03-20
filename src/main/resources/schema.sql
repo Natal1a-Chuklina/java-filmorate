@@ -5,7 +5,8 @@ create TABLE IF NOT EXISTS films(
   release_date date,
   duration int NOT NULL,
   rating_id int NOT NULL
-  CONSTRAINT positive_duration CHECK (duration > 0)
+  CONSTRAINT positive_duration CHECK (duration > 0),
+  CONSTRAINT fields_uniqueness UNIQUE (name, description, release_date, duration)
 );
 
 create TABLE IF NOT EXISTS genres (

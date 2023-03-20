@@ -2,9 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.dto.user.CreateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
-import ru.yandex.practicum.filmorate.dto.user.UserResponse;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -22,25 +20,25 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<UserResponse> getAll() {
+    public Collection<User> getAll() {
         log.info("Попытка получить список пользователей");
         return userService.getAll();
     }
 
     @PostMapping
-    public UserResponse create(@Valid @RequestBody CreateUserRequest createUserRequest) {
+    public User create(@Valid @RequestBody User createUserRequest) {
         log.info("Попытка создать пользователя: {}", createUserRequest);
         return userService.createUser(createUserRequest);
     }
 
     @PutMapping
-    public UserResponse update(@Valid @RequestBody UpdateUserRequest user) {
+    public User update(@Valid @RequestBody User user) {
         log.info("Попытка обновить информацию о пользователе: {}", user);
         return userService.updateUser(user);
     }
 
     @GetMapping("/{userId}")
-    public UserResponse getUserById(@PathVariable int userId) {
+    public User getUserById(@PathVariable int userId) {
         log.info("Попытка получить информацию о пользователе с id = {}", userId);
         return userService.getUserById(userId);
     }
@@ -58,13 +56,13 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends")
-    public List<UserResponse> getFriendsList(@PathVariable int userId) {
+    public List<User> getFriendsList(@PathVariable int userId) {
         log.info("Попытка получить список пользователей с id = {}", userId);
         return userService.getFriendsList(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<UserResponse> getSameFriendsList(@PathVariable int userId, @PathVariable int otherId) {
+    public List<User> getSameFriendsList(@PathVariable int userId, @PathVariable int otherId) {
         log.info("Попытка получить список общих друзей пользователей с id: {} и {}", userId, otherId);
         return userService.getSameFriendsList(userId, otherId);
     }

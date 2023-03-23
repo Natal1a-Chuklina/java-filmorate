@@ -7,11 +7,19 @@ import java.util.Collection;
 public interface FilmStorage {
     Collection<Film> getAll();
 
-    boolean isFilmExist(int filmId);
+    boolean isFilmExists(int filmId);
 
-    void add(Film film);
+    boolean isFilmContainsUserLike(int filmId, int userId);
+
+    int add(Film film);
 
     void update(Film film);
 
     Film getFilm(int filmId);
+
+    void addLike(int filmId, int userId);
+
+    void deleteLike(int filmId, int userId);
+
+    Collection<Film> getBestFilms(int count);
 }

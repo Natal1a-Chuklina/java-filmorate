@@ -26,9 +26,9 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        log.info("Попытка создать пользователя: {}", user);
-        return userService.createUser(user);
+    public User create(@Valid @RequestBody User createUserRequest) {
+        log.info("Попытка создать пользователя: {}", createUserRequest);
+        return userService.createUser(createUserRequest);
     }
 
     @PutMapping

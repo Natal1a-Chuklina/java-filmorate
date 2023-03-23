@@ -6,11 +6,14 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.yandex.practicum.filmorate.model.validate.StartDateValidation;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -27,14 +30,28 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private final Set<Integer> likes;
+    @Valid
+    private Mpa mpa;
+    private Set<@Valid Genre> genres;
+    private Set<Integer> likes;
 
-    public Film(String name, String description, LocalDate releaseDate, int duration) {
+    public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
+        this();
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.mpa = mpa;
+    }
+
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
+        this(name, description, releaseDate, duration, mpa);
+        this.id = id;
+    }
+
+    public Film() {
         likes = new HashSet<>();
+        genres = new HashSet<>();
     }
 
     public boolean addLike(int userId) {
@@ -43,5 +60,25 @@ public class Film {
 
     public boolean deleteLike(Integer userId) {
         return likes.remove(userId);
+    }
+
+    public boolean addGenre(Genre genre) {
+        return genres.add(genre);
+    }
+
+    public boolean deleteGenre(Genre genre) {
+        return genres.remove(genre);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+
+        values.put("name", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("rating_id", mpa.getId());
+
+        return values;
     }
 }

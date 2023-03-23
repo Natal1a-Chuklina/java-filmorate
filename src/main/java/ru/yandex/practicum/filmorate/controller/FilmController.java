@@ -17,7 +17,6 @@ import java.util.List;
 @Validated
 public class FilmController {
     private static final String DEFAULT_BEST_FILMS_COUNT = "10";
-
     private final FilmService filmService;
 
     public FilmController(FilmService filmService) {

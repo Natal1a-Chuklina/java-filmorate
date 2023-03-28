@@ -1223,4 +1223,97 @@ class FilmorateApplicationTests {
                     .isFalse();
         }).doesNotThrowAnyException();
     }
+
+    @Test
+    @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void testGettingNotEmptyCommonFilmsList() {
+        String email1 = "email1@mail.ru";
+        String login1 = "login1";
+        String name1 = "name1";
+        LocalDate birthday1 = LocalDate.now();
+
+        String email2 = "email2@mail.ru";
+        String login2 = "login2";
+        String name2 = "name2";
+        LocalDate birthday2 = LocalDate.now();
+
+        String name = "name";
+        String description = "description";
+        LocalDate releaseDate = LocalDate.now();
+        int duration = 120;
+        Mpa mpa = new Mpa(1, "G");
+        Set<Genre> genres = new LinkedHashSet<>(List.of(new Genre(1, "Комедия")));
+
+        assertThatCode(() -> {
+            int user1IdAdded = createUserInDb(email1, login1, name1, birthday1);
+            int user2IdAdded = createUserInDb(email2, login2, name2, birthday2);
+
+            int filmId = createFilmInDb(name, description, releaseDate, duration, mpa, genres);
+
+            filmStorage.addLike(filmId, user1IdAdded);
+            filmStorage.addLike(filmId, user2IdAdded);
+
+            Collection<Film> commonFilms = filmStorage.getCommonFilms(user1IdAdded, user2IdAdded);
+
+            Film expectedFilm = new Film(filmId, name, description, releaseDate, duration, mpa);
+            expectedFilm.setGenres(genres);
+            expectedFilm.addLike(user1IdAdded);
+            expectedFilm.addLike(user2IdAdded);
+
+            assertThat(commonFilms)
+                    .as("Проверка получения непустого списка общих любимых фильмов существующих пользователей")
+                    .isNotNull()
+                    .asList()
+                    .hasSize(1)
+                    .contains(expectedFilm);
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
+    @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void testGettingEmptyCommonFilmsList() {
+        String email1 = "email1@mail.ru";
+        String login1 = "login1";
+        String name1 = "name1";
+        LocalDate birthday1 = LocalDate.now();
+
+        String email2 = "email2@mail.ru";
+        String login2 = "login2";
+        String name2 = "name2";
+        LocalDate birthday2 = LocalDate.now();
+
+        assertThatCode(() -> {
+            int user1IdAdded = createUserInDb(email1, login1, name1, birthday1);
+            int user2IdAdded = createUserInDb(email2, login2, name2, birthday2);
+
+            Collection<Film> commonFilms = filmStorage.getCommonFilms(user1IdAdded, user2IdAdded);
+
+            assertThat(commonFilms)
+                    .as("Проверка получения пустого списка общих любимых фильмов существующих пользователей")
+                    .isNotNull()
+                    .asList()
+                    .isEmpty();
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
+    @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void testGettingCommonFilmsListOfNotExistingUsers() {
+        String email = "email@mail.ru";
+        String login = "login";
+        String name = "name";
+        LocalDate birthday = LocalDate.now();
+
+        assertThatCode(() -> {
+            int userIdAdded = createUserInDb(email, login, name, birthday);
+
+            Collection<Film> commonFilms = filmStorage.getCommonFilms(userIdAdded + 1, userIdAdded + 2);
+
+            assertThat(commonFilms)
+                    .as("Проверка получения пустого списка общих любимых фильмов несуществующих пользователей")
+                    .isNotNull()
+                    .asList()
+                    .isEmpty();
+        }).doesNotThrowAnyException();
+    }
 }

@@ -47,36 +47,35 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        if (!userStorage.isUserExistsById(user.getId())) {
-            log.warn("Выполнена попытка обновить информацию о пользователе с несуществующим id = {}.", user.getId());
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, user.getId()));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка обновить информацию о пользователе с несуществующим id = {}.",
+                user.getId());
 
         userStorage.update(user);
         return userStorage.getUser(user.getId());
     }
 
     public User getUserById(int userId) {
-        if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка получить пользователя по несущестующему id = {}", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка получить пользователя по несущестующему id = {}",
+                userId);
 
         return userStorage.getUser(userId);
     }
 
     public void addFriend(int userId, int friendId) {
         if (userId == friendId) {
+            log.warn("Выполнена попытка добавить самого себя в друзья пользователем с id = {}", userId);
             throw new IllegalArgumentException(USER_COULD_NOT_ADD_HIMSELF_TO_FRIEND);
         }
 
-        if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка добавить друга пользователю с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        } else if (!userStorage.isUserExistsById(friendId)) {
-            log.warn("Выполнена попытка добавить в друзья пользователя с несуществующим id = {}.", friendId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, friendId));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка добавить друга пользователю с несуществующим id = {}.",
+                userId);
+
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка добавить в друзья пользователя с несуществующим id = {}.",
+                friendId);
 
         if (userStorage.isUserContainsFriend(userId, friendId)) {
             log.warn("Выполнена попытка повторно добваить в друзья пользователю с id = {} пользователя с id = {}",
@@ -90,13 +89,13 @@ public class UserService {
     }
 
     public void deleteFriend(int userId, int friendId) {
-        if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка удалить друга у пользователя с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        } else if (!userStorage.isUserExistsById(friendId)) {
-            log.warn("Выполнена попытка удалить из друзей пользователя с несуществующим id = {}.", friendId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, friendId));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка удалить друга у пользователя с несуществующим id = {}.",
+                userId);
+
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка удалить из друзей пользователя с несуществующим id = {}.",
+                friendId);
 
         if (userStorage.isUserContainsFriend(userId, friendId)) {
             userStorage.deleteFriend(userId, friendId);
@@ -109,23 +108,29 @@ public class UserService {
     }
 
     public List<User> getFriendsList(int userId) {
-        if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка получить список друзей пользователя с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка получить список друзей пользователя с несуществующим id = {}.",
+                userId);
 
         return new ArrayList<>(userStorage.getFriends(userId));
     }
 
     public List<User> getSameFriendsList(int userId, int otherId) {
-        if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка получить список общих друзей пользователя с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        } else if (!userStorage.isUserExistsById(otherId)) {
-            log.warn("Выполнена попытка получить список общих друзей с пользователя с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, otherId));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка получить список общих друзей пользователя с несуществующим id = {}.",
+                userId);
+
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка получить список общих друзей с пользователем с несуществующим id = {}.",
+                otherId);
 
         return new ArrayList<>(userStorage.getCommonFriends(userId, otherId));
+    }
+
+    private void throwExceptionIfUserDoesNotExist(String logMessage, int userId) {
+        if (!userStorage.isUserExistsById(userId)) {
+            log.warn(logMessage, userId);
+            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
+        }
     }
 }

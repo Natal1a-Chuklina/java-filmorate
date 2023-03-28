@@ -69,8 +69,6 @@ public class FilmService {
         filmStorage.delete(filmId);
     }
 
-
-
     public void addLike(int filmId, int userId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn("Выполнена попытка поставить лайк фильму с несуществующим id = {}.", filmId);

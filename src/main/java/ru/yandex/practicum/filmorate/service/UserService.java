@@ -64,6 +64,14 @@ public class UserService {
 
         return userStorage.getUser(userId);
     }
+    public void deleteUser(int userId){
+        if (!userStorage.isUserExistsById(userId)) {
+            log.warn("Выполнена попытка получить пользователя по несущестующему id = {}", userId);
+            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
+        }
+
+        userStorage.delete(userId);
+    }
 
     public void addFriend(int userId, int friendId) {
         if (userId == friendId) {

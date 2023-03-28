@@ -43,6 +43,11 @@ public class UserController {
         return userService.getUserById(userId);
     }
 
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable int userId) {
+        userService.deleteUser(userId);
+    }
+
     @PutMapping("/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable int userId, @PathVariable int friendId) {
         log.info("Попытка добавить в друзья пользователю с id = {} пользователя с id = {}", userId, friendId);

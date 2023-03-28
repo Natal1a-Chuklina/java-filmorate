@@ -67,7 +67,7 @@ public class UserService {
 
     public void deleteUser(int userId) {
         if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка получить пользователя по несущестующему id = {}", userId);
+            log.warn("Выполнена попытка удалить пользователя по несущестующему id = {}", userId);
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
         }
 

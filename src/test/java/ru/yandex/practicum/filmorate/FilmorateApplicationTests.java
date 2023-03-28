@@ -313,8 +313,8 @@ class FilmorateApplicationTests {
         updateUserRequest.setId(userIdAdded);
 
         assertThatExceptionOfType(DataIntegrityViolationException.class)
-                .as("Проверка обновления пользователя некорректными данными (null где нельзя) %s"
-                        , updateUserRequest)
+                .as("Проверка обновления пользователя некорректными данными (null где нельзя) %s",
+                        updateUserRequest)
                 .isThrownBy(() -> userStorage.update(updateUserRequest))
                 .withMessageContaining("NULL not allowed for column");
     }
@@ -841,8 +841,7 @@ class FilmorateApplicationTests {
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testIncorrectFilmUpdating(Film updateFilmRequest) {
         assertThatExceptionOfType(DataIntegrityViolationException.class)
-                .as("Проверка обновления фильма некорректными данными %s"
-                        , updateFilmRequest)
+                .as("Проверка обновления фильма некорректными данными %s", updateFilmRequest)
                 .isThrownBy(() -> {
                     int filmId = createFilmInDb(
                             updateFilmRequest.getName(),

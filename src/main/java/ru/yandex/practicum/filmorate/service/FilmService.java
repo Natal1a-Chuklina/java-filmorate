@@ -60,7 +60,7 @@ public class FilmService {
         return filmStorage.getFilm(filmId);
     }
 
-    public void deleteFilm(int filmId){
+    public void deleteFilm(int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn("Выполнена попытка получить фильм по несущестующему id = {}", filmId);
             throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));

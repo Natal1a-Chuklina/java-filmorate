@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface FilmStorage {
     Collection<Film> getAll();
@@ -22,4 +23,6 @@ public interface FilmStorage {
     void deleteLike(int filmId, int userId);
 
     Collection<Film> getBestFilms(int count);
+
+    List<Film> getSortedFilmsByDirId(long directorId, String sort);
 }

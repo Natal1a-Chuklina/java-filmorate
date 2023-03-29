@@ -35,6 +35,8 @@ public class Film {
     private Set<@Valid Genre> genres;
     private Set<Integer> likes;
 
+    private Set<Director> directors;
+
     public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
         this();
         this.name = name;
@@ -52,6 +54,7 @@ public class Film {
     public Film() {
         likes = new HashSet<>();
         genres = new HashSet<>();
+        directors = new HashSet<>();
     }
 
     public boolean addLike(int userId) {
@@ -64,6 +67,14 @@ public class Film {
 
     public boolean addGenre(Genre genre) {
         return genres.add(genre);
+    }
+
+    public boolean addDirector(Director director) {
+        return directors.add(director);
+    }
+
+    public boolean deleteDirector(Director director) {
+        return directors.remove(director);
     }
 
     public boolean deleteGenre(Genre genre) {

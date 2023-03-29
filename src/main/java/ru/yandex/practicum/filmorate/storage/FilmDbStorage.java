@@ -50,7 +50,7 @@ public class FilmDbStorage implements FilmStorage {
                         "       r.name AS rating_name, " +
                         "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
                         "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                        "       array_agg(f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
@@ -137,7 +137,7 @@ public class FilmDbStorage implements FilmStorage {
                         "       r.name AS rating_name, " +
                         "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
                         "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                        "       array_agg(f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
@@ -186,7 +186,7 @@ public class FilmDbStorage implements FilmStorage {
                         "       r.name AS rating_name, " +
                         "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
                         "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                        "       array_agg(f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
@@ -216,7 +216,7 @@ public class FilmDbStorage implements FilmStorage {
                     "       r.name AS rating_name, " +
                     "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
                     "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                     "FROM films AS f " +
                     "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                     "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
@@ -238,7 +238,7 @@ public class FilmDbStorage implements FilmStorage {
                     "       r.name AS rating_name, " +
                     "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
                     "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                     "FROM films AS f " +
                     "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                     "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +

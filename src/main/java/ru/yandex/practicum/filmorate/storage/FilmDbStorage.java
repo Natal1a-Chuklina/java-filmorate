@@ -40,8 +40,8 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
@@ -121,8 +121,8 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
@@ -176,20 +176,53 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
                         "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
                         "LEFT JOIN likes AS l ON l.film_id = f.id " +
                         "GROUP BY f.id " +
-                        "ORDER BY count(l.user_id) DESC, " +
+                        "ORDER BY count(DISTINCT(l.user_id)) DESC, " +
                         "         f.name " +
                         "LIMIT ?;";
 
         log.info("Получен список топ {} фильмов из базы", count);
         return jdbcTemplate.query(sql, filmMapper, count);
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        String sql =
+                "SELECT f.id, " +
+                        "       f.name, " +
+                        "       f.description, " +
+                        "       f.release_date, " +
+                        "       f.duration, " +
+                        "       r.id AS rating_id, " +
+                        "       r.name AS rating_name, " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "FROM films AS f " +
+                        "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                        "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                        "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                        "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                        "WHERE f.id in " +
+                        "      (SELECT l_1.film_id " +
+                        "       FROM likes AS l_1 " +
+                        "       INNER JOIN " +
+                        "         (SELECT film_id " +
+                        "          FROM likes " +
+                        "          WHERE user_id = ?) AS l_2 ON l_1.film_id = l_2.film_id " +
+                        "       WHERE l_1.user_id = ?) " +
+                        "GROUP BY f.id " +
+                        "ORDER BY count(DISTINCT(l.user_id)) DESC, " +
+                        "         f.name;";
+
+        log.info("Получен список общих любимых фильмов пользователей с id: {} и {}", userId, friendId);
+        return jdbcTemplate.query(sql, filmMapper, userId, friendId);
     }
 
     private void addGenres(Set<Genre> genres, int filmId) {

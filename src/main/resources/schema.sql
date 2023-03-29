@@ -68,35 +68,43 @@ CREATE TABLE IF NOT EXISTS film_director
 
 alter table films add CONSTRAINT IF NOT EXISTS fk_film_rating
     FOREIGN KEY(rating_id)
-	REFERENCES ratings(id);
+	REFERENCES ratings(id)
+	on update cascade ON DELETE RESTRICT ;
 	
 alter table film_genre add CONSTRAINT IF NOT EXISTS fk_film_id
     FOREIGN KEY(film_id)
-	REFERENCES films(id);
+	REFERENCES films(id)
+	on update cascade ON DELETE CASCADE;
 	
 alter table film_genre add CONSTRAINT IF NOT EXISTS fk_genre_id
     FOREIGN KEY(genre_id)
-	REFERENCES genres(id);
+	REFERENCES genres(id)
+	on update cascade ON DELETE CASCADE;
 	
 alter table friends add CONSTRAINT IF NOT EXISTS fk_friend_1_user
     FOREIGN KEY(friend_1_id)
-	REFERENCES users(id);
+	REFERENCES users(id)
+	on update cascade ON DELETE CASCADE;
 	
 alter table friends add CONSTRAINT IF NOT EXISTS fk_friend_2_user
     FOREIGN KEY(friend_2_id)
-	REFERENCES users(id);
+	REFERENCES users(id)
+	on update cascade ON DELETE CASCADE;
 	
 alter table friends add CONSTRAINT IF NOT EXISTS fk_friendship_status
     FOREIGN KEY(status_id)
-	REFERENCES statuses(id);
+	REFERENCES statuses(id)
+	on update cascade ON DELETE RESTRICT;
 	
 alter table likes add CONSTRAINT IF NOT EXISTS fk_liked_film
     FOREIGN KEY(film_id)
-	REFERENCES films(id);
+	REFERENCES films(id)
+	on update cascade ON DELETE CASCADE;
 	
 alter table likes add CONSTRAINT IF NOT EXISTS fk_user_id
     FOREIGN KEY(user_id)
-	REFERENCES users(id);
+	REFERENCES users(id)
+	on update cascade ON DELETE CASCADE;
 
 ALTER TABLE film_director
     ADD FOREIGN KEY (film_id) REFERENCES films (id) ON UPDATE CASCADE ON DELETE CASCADE;

@@ -63,6 +63,15 @@ public class FilmService {
         return filmStorage.getFilm(filmId);
     }
 
+    public void deleteFilm(int filmId) {
+        if (!filmStorage.isFilmExists(filmId)) {
+            log.warn("Выполнена попытка удалить фильм по несущестующему id = {}", filmId);
+            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
+        }
+
+        filmStorage.delete(filmId);
+    }
+
     public void addLike(int filmId, int userId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn("Выполнена попытка поставить лайк фильму с несуществующим id = {}.", filmId);

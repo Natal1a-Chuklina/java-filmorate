@@ -45,20 +45,18 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        if (!filmStorage.isFilmExists(film.getId())) {
-            log.warn("Выполнена попытка обновить информацию о фильме с несуществующим id = {}.", film.getId());
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, film.getId()));
-        }
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка обновить информацию о фильме с несуществующим id = {}.",
+                film.getId());
 
         filmStorage.update(film);
         return filmStorage.getFilm(film.getId());
     }
 
     public Film getFilmById(int filmId) {
-        if (!filmStorage.isFilmExists(filmId)) {
-            log.warn("Выполнена попытка получить фильм по несущестующему id = {}", filmId);
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
-        }
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка получить фильм по несущестующему id = {}",
+                filmId);
 
         return filmStorage.getFilm(filmId);
     }
@@ -73,13 +71,13 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        if (!filmStorage.isFilmExists(filmId)) {
-            log.warn("Выполнена попытка поставить лайк фильму с несуществующим id = {}.", filmId);
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
-        } else if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка поставить лайк фильму пользователем с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка поставить лайк фильму с несуществующим id = {}.",
+                filmId);
+
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка поставить лайк фильму пользователем с несуществующим id = {}.",
+                userId);
 
         if (filmStorage.isFilmContainsUserLike(filmId, userId)) {
             log.warn("Выполнена попытка повторно поставить лайк фильму с id = {} пользователем с id = {}",
@@ -91,13 +89,13 @@ public class FilmService {
     }
 
     public void deleteLike(int filmId, int userId) {
-        if (!filmStorage.isFilmExists(filmId)) {
-            log.warn("Выполнена попытка удалить лайк фильма с несуществующим id = {}.", filmId);
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
-        } else if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка удалить лайк фильму пользователем с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка удалить лайк фильма с несуществующим id = {}.",
+                filmId);
+
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка удалить лайк фильму пользователем с несуществующим id = {}.",
+                userId);
 
         if (filmStorage.isFilmContainsUserLike(filmId, userId)) {
             filmStorage.deleteLike(filmId, userId);
@@ -114,6 +112,18 @@ public class FilmService {
 
     public List<Genre> getAllGenres() {
         return new ArrayList<>(genreStorage.getAll());
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка получить список общих любимых фильмов c пользователем с несуществующим id = {}.",
+                userId);
+
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка получить список общих любимых фильмов c пользователем с несуществующим id = {}.",
+                friendId);
+
+        return new ArrayList<>(filmStorage.getCommonFilms(userId, friendId));
     }
 
     public Genre getGenreById(int genreId) {
@@ -143,5 +153,19 @@ public class FilmService {
             throw new NotFoundException("Director not found");
         }
         return filmStorage.getSortedFilmsByDirId(directorId, sort);
+    }
+
+    private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {
+        if (!filmStorage.isFilmExists(filmId)) {
+            log.warn(logMessage, filmId);
+            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
+        }
+    }
+
+    private void throwExceptionIfUserDoesNotExist(String logMessage, int userId) {
+        if (!userStorage.isUserExistsById(userId)) {
+            log.warn(logMessage, userId);
+            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
+        }
     }
 }

@@ -27,4 +27,6 @@ public interface FilmStorage {
     Collection<Film> getBestFilms(int count);
 
     List<Film> getSortedFilmsByDirId(long directorId, String sort);
+
+    Collection<Film> getCommonFilms(int userId, int friendId);
 }

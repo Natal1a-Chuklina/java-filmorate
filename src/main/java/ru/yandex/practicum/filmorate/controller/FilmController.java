@@ -85,4 +85,10 @@ public class FilmController {
                                             @RequestParam(value = "sortBy") String sort) {
         return filmService.getSortedFilmsByDirId(directorId, sort);
     }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam int userId, @RequestParam int friendId) {
+        log.info("Попытка получить список общих любимых фильмов пользователей с id: {} и {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
 }

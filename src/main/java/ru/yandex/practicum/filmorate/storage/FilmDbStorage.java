@@ -119,7 +119,6 @@ public class FilmDbStorage implements FilmStorage {
         deleteGenres(film.getId());
         addGenres(film.getGenres(), film.getId());
         addDirectors(film.getId(), film.getDirectors());
-        film.setDirectors(getDirectorsByFilmId(film.getId()));
 
         addMpaName(film.getMpa());
         log.info("Информация о фильме с id = {} обновлена в базе", film.getId());
@@ -157,7 +156,7 @@ public class FilmDbStorage implements FilmStorage {
 
         final String sqlQuery = "DELETE FROM films WHERE id = ?";
         jdbcTemplate.update(sqlQuery, filmId);
-        log.info("Фильм с id = {} удалён ",filmId);
+        log.info("Фильм с id = {} удалён ", filmId);
 
     }
 
@@ -214,7 +213,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getSortedFilmsByDirId(long directorId, String sort) {
-        String sqlQuery;
+        String sqlQuery = "";
         if (sort.equals("likes")) {
             sqlQuery = "SELECT f.id, " +
                     "       f.name, " +
@@ -237,7 +236,7 @@ public class FilmDbStorage implements FilmStorage {
                     "GROUP BY f.id " +
                     "ORDER BY count(l.user_id) DESC, " +
                     "         f.name;";
-        } else {
+        } else if (sort.equals("year")) {
             sqlQuery = "SELECT f.id, " +
                     "       f.name, " +
                     "       f.description, " +
@@ -259,6 +258,7 @@ public class FilmDbStorage implements FilmStorage {
                     "GROUP BY f.release_date " +
                     "ORDER BY f.release_date, f.name;";
         }
+        log.info("Получен список фильмов режиссера с id = {}, отсортированный по {}", directorId, sort);
         return jdbcTemplate.query(sqlQuery, filmMapper, directorId);
     }
 
@@ -324,15 +324,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void addDirectors(long filmId, Set<Director> directors) {
+        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+        log.info("Удалены все режиссеры фильма с id = {}", filmId);
         if (directors == null || directors.isEmpty()) {
-            String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
-            jdbcTemplate.update(sqlQuery, filmId);
             return;
         }
         List<Director> directorListWithoutDuplicate = new ArrayList<>(directors);
         directorListWithoutDuplicate.sort((g1, g2) -> (int) (g1.getId() - g2.getId()));
-        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
-        jdbcTemplate.update(sqlQuery, filmId);
         jdbcTemplate.batchUpdate("INSERT INTO FILM_DIRECTOR (DIRECTOR_ID, FILM_ID) VALUES (?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -346,6 +345,7 @@ public class FilmDbStorage implements FilmStorage {
                         return directorListWithoutDuplicate.size();
                     }
                 });
+        log.info("Добавлены режиссеры - {} в фильм с id = {}", directors, filmId);
     }
 
     private Set<Director> getDirectorsByFilmId(long filmId) {

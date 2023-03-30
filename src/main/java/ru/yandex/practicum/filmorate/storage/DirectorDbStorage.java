@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+@Slf4j
 @Repository
 public class DirectorDbStorage implements DirectorStorage {
 
@@ -23,12 +25,14 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director getDirectorById(long id) {
         String sqlQuery = "SELECT * FROM DIRECTOR WHERE DIRECTOR_ID = ?";
+        log.info("Получен режиссер с id = {}", id);
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
     }
 
     @Override
     public List<Director> getAllDirectors() {
         String sqlQuery = "SELECT * FROM DIRECTOR";
+        log.info("Получены все режиссеры");
         return jdbcTemplate.query(sqlQuery, this::mapRowToDirector);
     }
 
@@ -43,6 +47,7 @@ public class DirectorDbStorage implements DirectorStorage {
         }, generatedKeyHolder);
         Long directorId = generatedKeyHolder.getKey().longValue();
         director.setId(directorId);
+        log.info("Добавлен режиссер с id = {}", director.getId());
         return director;
     }
 
@@ -52,17 +57,19 @@ public class DirectorDbStorage implements DirectorStorage {
         jdbcTemplate.update(sqlQuery,
                 director.getName(),
                 director.getId());
+        log.info("Обновлен режиссер с id = {}", director.getId());
         return director;
     }
 
     @Override
     public void deleteDirector(long id) {
         String sqlQuery = "DELETE FROM DIRECTOR WHERE DIRECTOR_ID = ?";
+        log.info("Удален режиссер с id = {}", id);
         jdbcTemplate.update(sqlQuery, id);
     }
 
     @Override
-    public boolean directorExists(long id) {
+    public boolean isDirectorExists(long id) {
         String sqlQuery = "SELECT COUNT(*) FROM DIRECTOR WHERE DIRECTOR_ID = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
         return result == 1;

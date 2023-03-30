@@ -16,5 +16,5 @@ public interface DirectorStorage {
 
     void deleteDirector(long id);
 
-    boolean directorExists(long id);
+    boolean isDirectorExists(long id);
 }

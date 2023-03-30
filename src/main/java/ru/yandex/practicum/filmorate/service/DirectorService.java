@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class DirectorService {
 
@@ -20,9 +22,7 @@ public class DirectorService {
     }
 
     public Director getDirectorById(long id) {
-        if (!directorStorage.directorExists(id)) {
-            throw new NotFoundException("Director not found");
-        }
+        checkDirectorExists(id);
         return directorStorage.getDirectorById(id);
     }
 
@@ -31,27 +31,23 @@ public class DirectorService {
     }
 
     public Director addDirector(Director director) {
-        validate(director);
         return directorStorage.addDirector(director);
     }
 
     public Director updateDirector(Director director) {
-        if (!directorStorage.directorExists(director.getId())) {
-            throw new NotFoundException("Director not found");
-        }
+        checkDirectorExists(director.getId());
         return directorStorage.updateDirector(director);
     }
 
     public void deleteDirector(long id) {
-        if (!directorStorage.directorExists(id)) {
-            throw new NotFoundException("Director not found");
-        }
+        checkDirectorExists(id);
         directorStorage.deleteDirector(id);
     }
 
-    private void validate(Director director) {
-        if (director.getName().isBlank() || director.getName().isEmpty()) {
-            throw new ValidationException("Director name is empty or blank");
+    private void checkDirectorExists(long id) {
+        if (!directorStorage.isDirectorExists(id)) {
+            log.warn("Выполнена попытка получить режиссера по несуществующему id = {}", id);
+            throw new NotFoundException(String.format(Constants.DIRECTOR_NOT_FOUND, id));
         }
     }
 }

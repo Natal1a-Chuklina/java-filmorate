@@ -329,7 +329,6 @@ public class FilmDbStorage implements FilmStorage {
             return;
         }
         List<Director> directorListWithoutDuplicate = new ArrayList<>(directors);
-        directorListWithoutDuplicate.sort((g1, g2) -> (int) (g1.getId() - g2.getId()));
         jdbcTemplate.batchUpdate("INSERT INTO FILM_DIRECTOR (DIRECTOR_ID, FILM_ID) VALUES (?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override

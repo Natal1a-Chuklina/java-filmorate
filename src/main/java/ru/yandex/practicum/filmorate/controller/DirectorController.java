@@ -42,7 +42,7 @@ public class DirectorController {
 
     @PostMapping
     public Director addDirector(@Valid @RequestBody Director director) {
-        log.info("Попытка добавить режиссера с id = {}", director.getId());
+        log.info("Попытка добавить режиссера");
         return directorService.addDirector(director);
     }
 

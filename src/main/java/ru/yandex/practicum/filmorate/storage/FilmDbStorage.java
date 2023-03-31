@@ -13,11 +13,9 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -346,18 +344,5 @@ public class FilmDbStorage implements FilmStorage {
                     }
                 });
         log.info("Добавлены режиссеры - {} в фильм с id = {}", directors, filmId);
-    }
-
-    private Set<Director> getDirectorsByFilmId(long filmId) {
-        String sqlQuery = "SELECT * FROM FILM_DIRECTOR FD " +
-                "LEFT JOIN DIRECTOR D on FD.DIRECTOR_ID = D.DIRECTOR_ID WHERE FD.FILM_ID = ?";
-        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId));
-    }
-
-    private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
-        return Director.builder()
-                .id(rs.getLong("DIRECTOR_ID"))
-                .name(rs.getString("DIRECTOR_NAME"))
-                .build();
     }
 }

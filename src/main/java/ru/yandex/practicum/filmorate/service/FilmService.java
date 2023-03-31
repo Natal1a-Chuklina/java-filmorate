@@ -140,7 +140,7 @@ public class FilmService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, review.getUserId()));
         }
         review = reviewStorage.create(review);
-        log.info("Review is added: {}", review);
+        log.info("Добавлен отзыв: {}", review);
         return review;
     }
 
@@ -150,7 +150,7 @@ public class FilmService {
             throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, review.getReviewId()));
         }
         review = reviewStorage.update(review);
-        log.info("Review is updated: {}", review);
+        log.info("Обновлен отзыв: {}", review);
         return review;
     }
 
@@ -161,19 +161,23 @@ public class FilmService {
         }
         int rows = reviewStorage.remove(id);
         if (rows > 0) {
-            log.info("Review with id {} was removed", id);
+            log.info("Отзыв с id {} был удален", id);
         }
     }
 
     public Review findReviewById(Integer id) {
+        if (reviewStorage.isReviewExists(id)) {
+            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
+            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
+        }
         Review review = reviewStorage.findReviewById(id);
-        log.info("Review is found in DB: {}", review);
+        log.info("В БД найден отзыв: {}", review);
         return review;
     }
 
     public List<Review> getAllReviews() {
         List<Review> reviews = reviewStorage.findAll();
-        log.info("Reviews quantity is: {}", reviews.size());
+        log.info("Количество отзывов: {}", reviews.size());
         return reviews;
     }
 
@@ -184,7 +188,7 @@ public class FilmService {
         }
         List<Review> reviews = reviewStorage.findReviewsByFilmId(filmId, count);
         if (reviews != null) {
-            log.info("Reviews quantity for film with id {} is: {}", filmId, reviews.size());
+            log.info("Для фильма с id {} количество отзывов: {}", filmId, reviews.size());
         }
 
         return reviews;
@@ -200,7 +204,7 @@ public class FilmService {
         }
 
         reviewStorage.addLike(id, userId);
-        log.info("User with id {} added a like to review with id {}", userId, id);
+        log.info("Пользователь с id {} добавил лайк отзыву с id {}", userId, id);
     }
 
     public void addDislikeToReview(Integer id, Integer userId) {
@@ -213,7 +217,7 @@ public class FilmService {
         }
 
         reviewStorage.addDislike(id, userId);
-        log.info("User with id {} added a dislike to review with id {}", userId, id);
+        log.info("Пользователь с id {} добавил дизлайк отзыву с id {}", userId, id);
     }
 
     public void removeLikeOfReview(Integer id, Integer userId) {
@@ -226,7 +230,7 @@ public class FilmService {
         }
 
         reviewStorage.removeLike(id, userId);
-        log.info("User with id {} removed a like of review with id {}", userId, id);
+        log.info("Пользователь с id {} удалил лайк у отзыва с id {}", userId, id);
     }
 
     public void removeDislikeOfReview(Integer id, Integer userId) {
@@ -239,6 +243,6 @@ public class FilmService {
         }
 
         reviewStorage.removeDislike(id, userId);
-        log.info("User with id {} removed a dislike of review with id {}", userId, id);
+        log.info("Пользователь с id {} удалил дизлайк у отзыва с id {}", userId, id);
     }
 }

@@ -166,6 +166,93 @@ public class FilmService {
         return filmStorage.getSortedFilmsByDirId(directorId, sort);
     }
 
+    public Review createReview(Review review) {
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка создать отзыв для фильма с несуществующим id = {}.",
+                review.getFilmId());
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка создать отзыв для фильма пользователем с несуществующим id = {}.",
+                review.getUserId());
+        review = reviewStorage.create(review);
+        log.info("Добавлен отзыв: {}", review);
+        return review;
+    }
+
+    public Review updateReview(Review review) {
+        throwExceptionIfReviewDoesNotExist(review.getReviewId());
+        review = reviewStorage.update(review);
+        log.info("Обновлен отзыв: {}", review);
+        return review;
+    }
+
+    public void removeReview(Integer id) {
+        throwExceptionIfReviewDoesNotExist(id);
+        int rows = reviewStorage.remove(id);
+        if (rows > 0) {
+            log.info("Отзыв с id {} был удален", id);
+        }
+    }
+
+    public Review findReviewById(Integer id) {
+        throwExceptionIfReviewDoesNotExist(id);
+        Review review = reviewStorage.findReviewById(id);
+        log.info("В БД найден отзыв: {}", review);
+        return review;
+    }
+
+    public List<Review> getAllReviews() {
+        List<Review> reviews = reviewStorage.findAll();
+        log.info("Количество отзывов: {}", reviews.size());
+        return reviews;
+    }
+
+    public List<Review> getReviewsByFilmId(Integer filmId, Integer count) {
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка получить отзыв для фильма с несуществующим id = {}.", filmId);
+        List<Review> reviews = reviewStorage.findReviewsByFilmId(filmId, count);
+        if (reviews != null) {
+            log.info("Для фильма с id {} количество отзывов: {}", filmId, reviews.size());
+        }
+
+        return reviews;
+    }
+
+    public void addLikeToReview(Integer id, Integer userId) {
+        throwExceptionIfReviewDoesNotExist(id);
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка поставить лайк отзыву пользователем с несуществующим id = {}.", userId);
+
+        reviewStorage.addLike(id, userId);
+        log.info("Пользователь с id {} добавил лайк отзыву с id {}", userId, id);
+    }
+
+    public void addDislikeToReview(Integer id, Integer userId) {
+        throwExceptionIfReviewDoesNotExist(id);
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка поставить дизлайк отзыву пользователем с несуществующим id = {}.", userId);
+
+        reviewStorage.addDislike(id, userId);
+        log.info("Пользователь с id {} добавил дизлайк отзыву с id {}", userId, id);
+    }
+
+    public void removeLikeOfReview(Integer id, Integer userId) {
+        throwExceptionIfReviewDoesNotExist(id);
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка удалить лайк отзыву пользователем с несуществующим id = {}.", userId);
+
+        reviewStorage.removeLike(id, userId);
+        log.info("Пользователь с id {} удалил лайк у отзыва с id {}", userId, id);
+    }
+
+    public void removeDislikeOfReview(Integer id, Integer userId) {
+        throwExceptionIfReviewDoesNotExist(id);
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка удалить дизлайк отзыву пользователем с несуществующим id = {}.", userId);
+
+        reviewStorage.removeDislike(id, userId);
+        log.info("Пользователь с id {} удалил дизлайк у отзыва с id {}", userId, id);
+    }
+
     private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn(logMessage, filmId);
@@ -180,6 +267,13 @@ public class FilmService {
         }
     }
 
+    private void throwExceptionIfReviewDoesNotExist(int reviewId) {
+        if (reviewStorage.isReviewExists(reviewId)) {
+            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", reviewId);
+            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, reviewId));
+        }
+    }
+
     private void checkDirectors(Film film) {
         for (Director director : film.getDirectors()) {
             if (!directorStorage.isDirectorExists(director.getId())) {
@@ -187,121 +281,5 @@ public class FilmService {
                 throw new NotFoundException(String.format(Constants.DIRECTOR_NOT_FOUND, director.getId()));
             }
         }
-    }
-
-    public Review createReview(Review review) {
-        if (!filmStorage.isFilmExists(review.getFilmId())) {
-            log.warn("Выполнена попытка создать отзыв для фильма с несуществующим id = {}.", review.getFilmId());
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, review.getFilmId()));
-        } else if (!userStorage.isUserExistsById(review.getUserId())) {
-            log.warn("Выполнена попытка создать отзыв для фильма пользователем с несуществующим id = {}.",
-                    review.getUserId());
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, review.getUserId()));
-        }
-        review = reviewStorage.create(review);
-        log.info("Добавлен отзыв: {}", review);
-        return review;
-    }
-
-    public Review updateReview(Review review) {
-        if (reviewStorage.isReviewExists(review.getReviewId())) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", review.getReviewId());
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, review.getReviewId()));
-        }
-        review = reviewStorage.update(review);
-        log.info("Обновлен отзыв: {}", review);
-        return review;
-    }
-
-    public void removeReview(Integer id) {
-        if (reviewStorage.isReviewExists(id)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
-        }
-        int rows = reviewStorage.remove(id);
-        if (rows > 0) {
-            log.info("Отзыв с id {} был удален", id);
-        }
-    }
-
-    public Review findReviewById(Integer id) {
-        if (reviewStorage.isReviewExists(id)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
-        }
-        Review review = reviewStorage.findReviewById(id);
-        log.info("В БД найден отзыв: {}", review);
-        return review;
-    }
-
-    public List<Review> getAllReviews() {
-        List<Review> reviews = reviewStorage.findAll();
-        log.info("Количество отзывов: {}", reviews.size());
-        return reviews;
-    }
-
-    public List<Review> getReviewsByFilmId(Integer filmId, Integer count) {
-        if (!filmStorage.isFilmExists(filmId)) {
-            log.warn("Выполнена попытка получить отзыв для фильма с несуществующим id = {}.", filmId);
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
-        }
-        List<Review> reviews = reviewStorage.findReviewsByFilmId(filmId, count);
-        if (reviews != null) {
-            log.info("Для фильма с id {} количество отзывов: {}", filmId, reviews.size());
-        }
-
-        return reviews;
-    }
-
-    public void addLikeToReview(Integer id, Integer userId) {
-        if (reviewStorage.isReviewExists(id)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
-        } else if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка поставить лайк отзыву пользователем с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
-
-        reviewStorage.addLike(id, userId);
-        log.info("Пользователь с id {} добавил лайк отзыву с id {}", userId, id);
-    }
-
-    public void addDislikeToReview(Integer id, Integer userId) {
-        if (reviewStorage.isReviewExists(id)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
-        } else if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка поставить лайк отзыву пользователем с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
-
-        reviewStorage.addDislike(id, userId);
-        log.info("Пользователь с id {} добавил дизлайк отзыву с id {}", userId, id);
-    }
-
-    public void removeLikeOfReview(Integer id, Integer userId) {
-        if (reviewStorage.isReviewExists(id)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
-        } else if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка удалить лайк отзыву пользователем с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
-
-        reviewStorage.removeLike(id, userId);
-        log.info("Пользователь с id {} удалил лайк у отзыва с id {}", userId, id);
-    }
-
-    public void removeDislikeOfReview(Integer id, Integer userId) {
-        if (reviewStorage.isReviewExists(id)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", id);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, id));
-        } else if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка удалить лайк отзыву пользователем с несуществующим id = {}.", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
-
-        reviewStorage.removeDislike(id, userId);
-        log.info("Пользователь с id {} удалил дизлайк у отзыва с id {}", userId, id);
     }
 }

@@ -122,6 +122,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void delete(int userId) {
+        final String sqlQuery = "DELETE FROM users WHERE id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
+        log.info("Пользователь с id {} удален", userId);
+    }
+
+    @Override
     public void addFriend(int userId, int friendId, Status status) {
         if (status == null) {
             return;

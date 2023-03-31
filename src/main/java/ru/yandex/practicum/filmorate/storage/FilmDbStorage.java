@@ -1,16 +1,22 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Repository
@@ -40,13 +46,16 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
                         "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
                         "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                        "LEFT JOIN film_director AS f_d ON f_d.film_id = f.id " +
+                        "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
                         "GROUP BY f.id;";
 
         log.info("Получен список всех фильмов из базы");
@@ -80,6 +89,7 @@ public class FilmDbStorage implements FilmStorage {
 
         addGenres(film.getGenres(), filmId);
         addMpaName(film.getMpa());
+        addDirectors(filmId, film.getDirectors());
 
         log.info("В базу добавлен фильм с id = {}", filmId);
         return filmId;
@@ -106,6 +116,7 @@ public class FilmDbStorage implements FilmStorage {
 
         deleteGenres(film.getId());
         addGenres(film.getGenres(), film.getId());
+        addDirectors(film.getId(), film.getDirectors());
 
         addMpaName(film.getMpa());
         log.info("Информация о фильме с id = {} обновлена в базе", film.getId());
@@ -121,18 +132,30 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
                         "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
                         "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                        "LEFT JOIN film_director AS f_d ON f_d.film_id = f.id " +
+                        "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
                         "WHERE f.id = ? " +
                         "GROUP BY f.id;";
 
         log.info("Фильм с id = {} получен из базы", filmId);
         return jdbcTemplate.queryForObject(sql, filmMapper, filmId);
+    }
+
+    @Override
+    public void delete(int filmId) {
+
+        final String sqlQuery = "DELETE FROM films WHERE id = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+        log.info("Фильм с id = {} удалён ", filmId);
+
     }
 
     @Override
@@ -167,20 +190,110 @@ public class FilmDbStorage implements FilmStorage {
                         "       f.duration, " +
                         "       r.id AS rating_id, " +
                         "       r.name AS rating_name, " +
-                        "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                         "FROM films AS f " +
                         "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
                         "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
                         "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
                         "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                        "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                        "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
                         "GROUP BY f.id " +
-                        "ORDER BY count(l.user_id) DESC, " +
+                        "ORDER BY count(DISTINCT(l.user_id)) DESC, " +
                         "         f.name " +
                         "LIMIT ?;";
 
         log.info("Получен список топ {} фильмов из базы", count);
         return jdbcTemplate.query(sql, filmMapper, count);
+    }
+
+    @Override
+    public List<Film> getSortedFilmsByDirId(long directorId, String sort) {
+        String sqlQuery = "";
+        if (sort.equals("likes")) {
+            sqlQuery = "SELECT f.id, " +
+                    "       f.name, " +
+                    "       f.description, " +
+                    "       f.release_date, " +
+                    "       f.duration, " +
+                    "       r.id AS rating_id, " +
+                    "       r.name AS rating_name, " +
+                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
+                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                    "FROM films AS f " +
+                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
+                    "WHERE f_d.director_id = ? " +
+                    "GROUP BY f.id " +
+                    "ORDER BY count(l.user_id) DESC, " +
+                    "         f.name;";
+        } else if (sort.equals("year")) {
+            sqlQuery = "SELECT f.id, " +
+                    "       f.name, " +
+                    "       f.description, " +
+                    "       f.release_date, " +
+                    "       f.duration, " +
+                    "       r.id AS rating_id, " +
+                    "       r.name AS rating_name, " +
+                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
+                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                    "FROM films AS f " +
+                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
+                    "WHERE f_d.director_id = ? " +
+                    "GROUP BY f.release_date " +
+                    "ORDER BY f.release_date, f.name;";
+        }
+        log.info("Получен список фильмов режиссера с id = {}, отсортированный по {}", directorId, sort);
+        return jdbcTemplate.query(sqlQuery, filmMapper, directorId);
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        String sql =
+                "SELECT f.id, " +
+                        "       f.name, " +
+                        "       f.description, " +
+                        "       f.release_date, " +
+                        "       f.duration, " +
+                        "       r.id AS rating_id, " +
+                        "       r.name AS rating_name, " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                        "FROM films AS f " +
+                        "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                        "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                        "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                        "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                        "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                        "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
+                        "WHERE f.id in " +
+                        "      (SELECT l_1.film_id " +
+                        "       FROM likes AS l_1 " +
+                        "       INNER JOIN " +
+                        "         (SELECT film_id " +
+                        "          FROM likes " +
+                        "          WHERE user_id = ?) AS l_2 ON l_1.film_id = l_2.film_id " +
+                        "       WHERE l_1.user_id = ?) " +
+                        "GROUP BY f.id " +
+                        "ORDER BY count(DISTINCT(l.user_id)) DESC, " +
+                        "         f.name;";
+
+        log.info("Получен список общих любимых фильмов пользователей с id: {} и {}", userId, friendId);
+        return jdbcTemplate.query(sql, filmMapper, userId, friendId);
     }
 
     private void addGenres(Set<Genre> genres, int filmId) {
@@ -206,5 +319,29 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "DELETE FROM film_genre WHERE film_id = ?;";
         jdbcTemplate.update(sql, filmId);
         log.info("Удалены все жанры фильма с id = {}", filmId);
+    }
+
+    private void addDirectors(long filmId, Set<Director> directors) {
+        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+        log.info("Удалены все режиссеры фильма с id = {}", filmId);
+        if (directors == null || directors.isEmpty()) {
+            return;
+        }
+        List<Director> directorListWithoutDuplicate = new ArrayList<>(directors);
+        jdbcTemplate.batchUpdate("INSERT INTO FILM_DIRECTOR (DIRECTOR_ID, FILM_ID) VALUES (?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, directorListWithoutDuplicate.get(i).getId());
+                        ps.setLong(2, filmId);
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return directorListWithoutDuplicate.size();
+                    }
+                });
+        log.info("Добавлены режиссеры - {} в фильм с id = {}", directors, filmId);
     }
 }

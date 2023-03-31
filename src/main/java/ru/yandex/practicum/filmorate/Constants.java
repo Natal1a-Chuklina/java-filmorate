@@ -16,6 +16,7 @@ public class Constants {
     public static final String FILM_ALREADY_EXISTS_MESSAGE = "Фильм с такими именем, описанием, датой релиза и" +
             " длительностью уже существует";
     public static final String REVIEW_NOT_FOUND_MESSAGE = "Отзыв с идентификатором %d не найден";
+    public static final String DIRECTOR_NOT_FOUND = "Режиссер с идентификатором %d не найден";
 
     private Constants() {
     }

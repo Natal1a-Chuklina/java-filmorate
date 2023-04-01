@@ -298,93 +298,47 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getSortedFilmByQuery(String query, String by) {
-        String sqlQuery = "";
         query = "%" + query + "%";
-        if (by.equals("director")) {
-            sqlQuery = "SELECT f.id, " +
-                    "       f.name, " +
-                    "       f.description, " +
-                    "       f.release_date, " +
-                    "       f.duration, " +
-                    "       r.id AS rating_id, " +
-                    "       r.name AS rating_name, " +
-                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                    "FROM films AS f " +
-                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
-                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
-                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                    "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
-                    "GROUP BY D.DIRECTOR_NAME ORDER BY D.DIRECTOR_NAME";
-            log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
-            return jdbcTemplate.query(sqlQuery, filmMapper, query);
-        } else if (by.equals("title")) {
-            sqlQuery = "SELECT f.id, " +
-                    "       f.name, " +
-                    "       f.description, " +
-                    "       f.release_date, " +
-                    "       f.duration, " +
-                    "       r.id AS rating_id, " +
-                    "       r.name AS rating_name, " +
-                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                    "FROM films AS f " +
-                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
-                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
-                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                    "WHERE LOWER(F.NAME) LIKE LOWER(?) " +
-                    "GROUP BY F.NAME ORDER BY F.NAME";
-            log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
-            return jdbcTemplate.query(sqlQuery, filmMapper, query);
-        }
-        if (by.equals("director,title")) {
-            sqlQuery = "SELECT f.id, " +
-                    "       f.name, " +
-                    "       f.description, " +
-                    "       f.release_date, " +
-                    "       f.duration, " +
-                    "       r.id AS rating_id, " +
-                    "       r.name AS rating_name, " +
-                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                    "FROM films AS f " +
-                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
-                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
-                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                    "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) OR LOWER(F.NAME) LIKE LOWER(?) " +
-                    "GROUP BY D.DIRECTOR_NAME, F.NAME ORDER BY D.DIRECTOR_NAME, F.NAME";
-        } else if (by.equals("title,director")) {
-            sqlQuery = "SELECT f.id, " +
-                    "       f.name, " +
-                    "       f.description, " +
-                    "       f.release_date, " +
-                    "       f.duration, " +
-                    "       r.id AS rating_id, " +
-                    "       r.name AS rating_name, " +
-                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                    "FROM films AS f " +
-                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
-                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
-                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                    "WHERE LOWER(F.NAME) LIKE LOWER(?) OR LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
-                    "GROUP BY F.NAME, D.DIRECTOR_NAME ORDER BY F.NAME DESC, D.DIRECTOR_NAME";
+        String sqlQuery = "SELECT f.id, " +
+                "       f.name, " +
+                "       f.description, " +
+                "       f.release_date, " +
+                "       f.duration, " +
+                "       r.id AS rating_id, " +
+                "       r.name AS rating_name, " +
+                "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
+                "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                "FROM films AS f " +
+                "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                "LEFT JOIN director AS d ON d.director_id = f_d.director_id ";
+        switch (by) {
+            case "director":
+                sqlQuery = sqlQuery +
+                        "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
+                        "GROUP BY D.DIRECTOR_NAME ORDER BY D.DIRECTOR_NAME";
+                log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
+                return jdbcTemplate.query(sqlQuery, filmMapper, query);
+            case "title":
+                sqlQuery = sqlQuery +
+                        "WHERE LOWER(F.NAME) LIKE LOWER(?) " +
+                        "GROUP BY F.NAME ORDER BY F.NAME";
+                log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
+                return jdbcTemplate.query(sqlQuery, filmMapper, query);
+            case "director,title":
+                sqlQuery = sqlQuery +
+                        "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) OR LOWER(F.NAME) LIKE LOWER(?) " +
+                        "GROUP BY D.DIRECTOR_NAME, F.NAME ORDER BY D.DIRECTOR_NAME, F.NAME";
+                break;
+            case "title,director":
+                sqlQuery = sqlQuery +
+                        "WHERE LOWER(F.NAME) LIKE LOWER(?) OR LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
+                        "GROUP BY F.NAME, D.DIRECTOR_NAME ORDER BY F.NAME DESC, D.DIRECTOR_NAME";
+                break;
         }
         log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
         return jdbcTemplate.query(sqlQuery, filmMapper, query, query);

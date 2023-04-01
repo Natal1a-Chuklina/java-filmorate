@@ -306,8 +306,8 @@ public class FilmDbStorage implements FilmStorage {
                 "       f.duration, " +
                 "       r.id AS rating_id, " +
                 "       r.name AS rating_name, " +
-                "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
+                "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
                 "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
                 "FROM films AS f " +
                 "LEFT JOIN ratings AS r ON r.id = f.rating_id " +

@@ -1319,7 +1319,7 @@ class FilmorateApplicationTests {
     @Test
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testGettingLikedFilmByUserIdWithNoExistingUser() {
-        assertThatCode(()-> {
+        assertThatCode(() -> {
             Collection<Film> userLikes = filmStorage.getLikesByUserId(1);
 
             assertThat(userLikes)
@@ -1355,7 +1355,7 @@ class FilmorateApplicationTests {
         assertThatCode(() -> {
             createFilmInDb(filmName1, description1, releaseDate1, duration1, mpa1, genres1);
             createFilmInDb(filmName2, description2, releaseDate2, duration2, mpa2, genres2);
-            int  userId = createUserInDb(email, login, name, birthday);
+            int userId = createUserInDb(email, login, name, birthday);
 
             Collection<Film> userLikes = filmStorage.getLikesByUserId(userId);
 
@@ -1397,9 +1397,9 @@ class FilmorateApplicationTests {
             Film expectedFilm = new Film(filmId1, filmName1, description1, releaseDate1, duration1, mpa1);
             expectedFilm.setGenres(genres1);
             expectedFilm.addLike(userId);
-            
+
             Collection<Film> userLikes = filmStorage.getLikesByUserId(userId);
-            
+
             assertThat(userLikes)
                     .as("Проверка получения списка фильмов с лайками от пользователя с одним лайком")
                     .isNotNull()
@@ -1457,7 +1457,7 @@ class FilmorateApplicationTests {
     @Test
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testGettingSimilarInterestsForNotExistingUsers() {
-        assertThatCode(()-> {
+        assertThatCode(() -> {
             Collection<User> interestUsers = userStorage.getSimilarInterestUsers(1);
 
             assertThat(interestUsers)
@@ -1480,7 +1480,7 @@ class FilmorateApplicationTests {
         String login2 = "login2";
         String name2 = "name2";
         LocalDate birthday2 = LocalDate.now();
-        
+
         String filmName1 = "Film1";
         String description1 = "description1";
         LocalDate releaseDate1 = LocalDate.now();

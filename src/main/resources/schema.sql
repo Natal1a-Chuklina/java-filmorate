@@ -124,9 +124,11 @@ create TABLE IF NOT EXISTS reviews (
 create TABLE IF NOT EXISTS reviews_likes (
   review_id int REFERENCES reviews(id) ON DELETE CASCADE,
   user_id int REFERENCES users(id)
+  PRIMARY KEY (review_id, user_id)
 );
 
 create TABLE IF NOT EXISTS reviews_dislikes (
   review_id int REFERENCES reviews(id) ON DELETE CASCADE,
   user_id int REFERENCES users(id)
+  PRIMARY KEY (review_id, user_id)
 );

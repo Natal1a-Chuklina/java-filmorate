@@ -209,4 +209,41 @@ public class UserDbStorage implements UserStorage {
         log.info("Получен из базы список общих друзей пользователей с id: {} и {}", userId, otherId);
         return jdbcTemplate.query(sql, userMapper, userId, otherId);
     }
+
+    @Override
+    public Collection<User> getSimilarInterestUsers(int userId) {
+        String sql = 
+                        "SELECT u.id, " +
+                        "       u.name, " +
+                        "       u.login, " +
+                        "       u.email, " +
+                        "       u.birthday, " +
+                        "       array_agg(f.friend_2_id || ' ' || s.name) AS friends_data " +
+                        "FROM users AS u " +
+                        "         LEFT JOIN friends AS f ON f.friend_1_id = u.id " +
+                        "         LEFT JOIN statuses AS s ON s.id = f.status_id " +
+                        "WHERE u.id IN ( " +
+                        "    SELECT user_id FROM ( " +
+                        "        SELECT user_id, COUNT(1) AS CNT FROM likes " +
+                        "        WHERE user_id <> ? " +
+                        "          AND film_id IN ( " +
+                        "            select film_id from LIKES where user_id = ? " +
+                        "            ) " +
+                        "        GROUP BY user_id " +
+                        "        HAVING CNT=( " +
+                        "            SELECT COUNT(1) FROM likes " +
+                        "            WHERE film_id IN ( " +
+                        "                select film_id from likes " +
+                        "                where user_id = ? " +
+                        "                ) " +
+                        "            GROUP BY user_id " +
+                        "            ORDER BY CNT LIMIT 1) " +
+                        "        ORDER BY CNT DESC " +
+                        "        ) " +
+                        "    ) " +
+                        "GROUP BY u.id;";
+
+        log.info("Получен список всех пользователей со схожими интересами с пользователем с id = {}", userId);
+        return jdbcTemplate.query(sql, userMapper, userId, userId, userId);
+    }
 }

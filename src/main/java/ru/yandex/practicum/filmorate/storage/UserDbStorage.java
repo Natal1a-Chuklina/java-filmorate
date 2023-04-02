@@ -212,8 +212,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getSimilarInterestUsers(int userId) {
-        String sql = 
-                        "SELECT u.id, " +
+        String sql =
+                "SELECT u.id, " +
                         "       u.name, " +
                         "       u.login, " +
                         "       u.email, " +

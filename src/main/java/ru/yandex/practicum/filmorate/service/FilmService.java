@@ -9,12 +9,10 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
@@ -28,17 +26,15 @@ public class FilmService {
     private final UserStorage userStorage;
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
-    private final ReviewStorage reviewStorage;
     private final DirectorStorage directorStorage;
 
     public FilmService(FilmStorage filmStorage, UserStorage userStorage, GenreStorage genreStorage,
-                       MpaStorage mpaStorage, ReviewStorage reviewStorage, DirectorStorage directorStorage) {
+                       MpaStorage mpaStorage, DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.directorStorage = directorStorage;
-        this.reviewStorage = reviewStorage;
     }
 
     public Collection<Film> getAll() {
@@ -166,93 +162,6 @@ public class FilmService {
         return filmStorage.getSortedFilmsByDirId(directorId, sort);
     }
 
-    public Review createReview(Review review) {
-        throwExceptionIfFilmDoesNotExist(
-                "Выполнена попытка создать отзыв для фильма с несуществующим id = {}.",
-                review.getFilmId());
-        throwExceptionIfUserDoesNotExist(
-                "Выполнена попытка создать отзыв для фильма пользователем с несуществующим id = {}.",
-                review.getUserId());
-        review = reviewStorage.create(review);
-        log.info("Добавлен отзыв: {}", review);
-        return review;
-    }
-
-    public Review updateReview(Review review) {
-        throwExceptionIfReviewDoesNotExist(review.getReviewId());
-        review = reviewStorage.update(review);
-        log.info("Обновлен отзыв: {}", review);
-        return review;
-    }
-
-    public void removeReview(Integer id) {
-        throwExceptionIfReviewDoesNotExist(id);
-        int rows = reviewStorage.remove(id);
-        if (rows > 0) {
-            log.info("Отзыв с id {} был удален", id);
-        }
-    }
-
-    public Review findReviewById(Integer id) {
-        throwExceptionIfReviewDoesNotExist(id);
-        Review review = reviewStorage.findReviewById(id);
-        log.info("В БД найден отзыв: {}", review);
-        return review;
-    }
-
-    public List<Review> getAllReviews() {
-        List<Review> reviews = reviewStorage.findAll();
-        log.info("Количество отзывов: {}", reviews.size());
-        return reviews;
-    }
-
-    public List<Review> getReviewsByFilmId(Integer filmId, Integer count) {
-        throwExceptionIfFilmDoesNotExist(
-                "Выполнена попытка получить отзыв для фильма с несуществующим id = {}.", filmId);
-        List<Review> reviews = reviewStorage.findReviewsByFilmId(filmId, count);
-        if (reviews != null) {
-            log.info("Для фильма с id {} количество отзывов: {}", filmId, reviews.size());
-        }
-
-        return reviews;
-    }
-
-    public void addLikeToReview(Integer id, Integer userId) {
-        throwExceptionIfReviewDoesNotExist(id);
-        throwExceptionIfUserDoesNotExist(
-                "Выполнена попытка поставить лайк отзыву пользователем с несуществующим id = {}.", userId);
-
-        reviewStorage.addLike(id, userId);
-        log.info("Пользователь с id {} добавил лайк отзыву с id {}", userId, id);
-    }
-
-    public void addDislikeToReview(Integer id, Integer userId) {
-        throwExceptionIfReviewDoesNotExist(id);
-        throwExceptionIfUserDoesNotExist(
-                "Выполнена попытка поставить дизлайк отзыву пользователем с несуществующим id = {}.", userId);
-
-        reviewStorage.addDislike(id, userId);
-        log.info("Пользователь с id {} добавил дизлайк отзыву с id {}", userId, id);
-    }
-
-    public void removeLikeOfReview(Integer id, Integer userId) {
-        throwExceptionIfReviewDoesNotExist(id);
-        throwExceptionIfUserDoesNotExist(
-                "Выполнена попытка удалить лайк отзыву пользователем с несуществующим id = {}.", userId);
-
-        reviewStorage.removeLike(id, userId);
-        log.info("Пользователь с id {} удалил лайк у отзыва с id {}", userId, id);
-    }
-
-    public void removeDislikeOfReview(Integer id, Integer userId) {
-        throwExceptionIfReviewDoesNotExist(id);
-        throwExceptionIfUserDoesNotExist(
-                "Выполнена попытка удалить дизлайк отзыву пользователем с несуществующим id = {}.", userId);
-
-        reviewStorage.removeDislike(id, userId);
-        log.info("Пользователь с id {} удалил дизлайк у отзыва с id {}", userId, id);
-    }
-
     private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn(logMessage, filmId);
@@ -264,13 +173,6 @@ public class FilmService {
         if (!userStorage.isUserExistsById(userId)) {
             log.warn(logMessage, userId);
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
-    }
-
-    private void throwExceptionIfReviewDoesNotExist(int reviewId) {
-        if (reviewStorage.isReviewExists(reviewId)) {
-            log.warn("Выполнена попытка получить отзыв по несущестующему id = {}", reviewId);
-            throw new NotFoundException(String.format(Constants.REVIEW_NOT_FOUND_MESSAGE, reviewId));
         }
     }
 

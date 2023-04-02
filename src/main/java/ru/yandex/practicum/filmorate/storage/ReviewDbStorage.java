@@ -115,6 +115,20 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public boolean isReviewExists(Integer id) {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet("SELECT * FROM reviews WHERE id = ?", id);
-        return !rowSet.next();
+        return rowSet.next();
+    }
+
+    @Override
+    public boolean hasUserAlreadyLeftLikeForFilm(Integer reviewId, Integer userId) {
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(
+                "SELECT * FROM reviews_likes WHERE review_id = ? AND user_id = ?", reviewId, userId);
+        return rowSet.next();
+    }
+
+    @Override
+    public boolean hasUserAlreadyLeftDislikeForFilm(Integer reviewId, Integer userId) {
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet(
+                "SELECT * FROM reviews_dislikes WHERE review_id = ? AND user_id = ?", reviewId, userId);
+        return rowSet.next();
     }
 }

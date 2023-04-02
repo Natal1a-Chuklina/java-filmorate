@@ -26,4 +26,8 @@ public interface ReviewStorage {
     void removeDislike(Integer id, Integer userId);
 
     boolean isReviewExists(Integer id);
+
+    boolean hasUserAlreadyLeftLikeForFilm(Integer reviewId, Integer userId);
+
+    boolean hasUserAlreadyLeftDislikeForFilm(Integer reviewId, Integer userId);
 }

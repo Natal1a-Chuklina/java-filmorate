@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @ToString
@@ -18,14 +18,13 @@ import javax.validation.constraints.NotBlank;
 public class Review {
     @Setter
     private int reviewId;
-    @NonNull
     @NotBlank
     private String content;
-    @NonNull
+    @NotNull
     private Boolean isPositive;
-    @NonNull
+    @NotNull
     private Integer userId;
-    @NonNull
+    @NotNull
     private Integer filmId;
     private int useful;
 }

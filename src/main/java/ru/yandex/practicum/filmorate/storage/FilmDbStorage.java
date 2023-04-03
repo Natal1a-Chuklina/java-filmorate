@@ -211,50 +211,32 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getSortedFilmsByDirId(long directorId, String sort) {
-        String sqlQuery = "";
-        if (sort.equals("likes")) {
-            sqlQuery = "SELECT f.id, " +
-                    "       f.name, " +
-                    "       f.description, " +
-                    "       f.release_date, " +
-                    "       f.duration, " +
-                    "       r.id AS rating_id, " +
-                    "       r.name AS rating_name, " +
-                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                    "FROM films AS f " +
-                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
-                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
-                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                    "WHERE f_d.director_id = ? " +
-                    "GROUP BY f.id " +
-                    "ORDER BY count(l.user_id) DESC, " +
-                    "         f.name;";
-        } else if (sort.equals("year")) {
-            sqlQuery = "SELECT f.id, " +
-                    "       f.name, " +
-                    "       f.description, " +
-                    "       f.release_date, " +
-                    "       f.duration, " +
-                    "       r.id AS rating_id, " +
-                    "       r.name AS rating_name, " +
-                    "       array_agg(f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                    "       array_agg(l.user_id ORDER BY l.user_id) AS likes_data, " +
-                    "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                    "FROM films AS f " +
-                    "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                    "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                    "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                    "LEFT JOIN likes AS l ON l.film_id = f.id " +
-                    "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
-                    "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                    "WHERE f_d.director_id = ? " +
-                    "GROUP BY f.release_date " +
-                    "ORDER BY f.release_date, f.name;";
+        String sqlQuery = "SELECT f.id, " +
+                "       f.name, " +
+                "       f.description, " +
+                "       f.release_date, " +
+                "       f.duration, " +
+                "       r.id AS rating_id, " +
+                "       r.name AS rating_name, " +
+                "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
+                "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                "FROM films AS f " +
+                "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
+                "WHERE f_d.director_id = ? " +
+                "GROUP BY f.id ";
+        switch (sort) {
+            case "likes":
+                sqlQuery = sqlQuery + "ORDER BY COUNT(DISTINCT l.user_id) DESC, f.name;";
+                break;
+            case "year":
+                sqlQuery = sqlQuery + "ORDER BY f.release_date, f.name;";
+                break;
         }
         log.info("Получен список фильмов режиссера с id = {}, отсортированный по {}", directorId, sort);
         return jdbcTemplate.query(sqlQuery, filmMapper, directorId);

@@ -320,24 +320,24 @@ public class FilmDbStorage implements FilmStorage {
             case "director":
                 sqlQuery = sqlQuery +
                         "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
-                        "GROUP BY D.DIRECTOR_NAME ORDER BY D.DIRECTOR_NAME";
+                        "GROUP BY F.ID ORDER BY D.DIRECTOR_NAME";
                 log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
                 return jdbcTemplate.query(sqlQuery, filmMapper, query);
             case "title":
                 sqlQuery = sqlQuery +
                         "WHERE LOWER(F.NAME) LIKE LOWER(?) " +
-                        "GROUP BY F.NAME ORDER BY F.NAME";
+                        "GROUP BY F.ID ORDER BY F.NAME";
                 log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);
                 return jdbcTemplate.query(sqlQuery, filmMapper, query);
             case "director,title":
                 sqlQuery = sqlQuery +
                         "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) OR LOWER(F.NAME) LIKE LOWER(?) " +
-                        "GROUP BY D.DIRECTOR_NAME, F.NAME ORDER BY D.DIRECTOR_NAME, F.NAME";
+                        "GROUP BY F.ID ORDER BY D.DIRECTOR_NAME, F.NAME";
                 break;
             case "title,director":
                 sqlQuery = sqlQuery +
                         "WHERE LOWER(F.NAME) LIKE LOWER(?) OR LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
-                        "GROUP BY F.NAME, D.DIRECTOR_NAME ORDER BY F.NAME DESC, D.DIRECTOR_NAME";
+                        "GROUP BY F.ID ORDER BY F.NAME DESC, D.DIRECTOR_NAME";
                 break;
         }
         log.info("Получены фильмы, отсортированные по {}, имеющих подстроку {}", by, query);

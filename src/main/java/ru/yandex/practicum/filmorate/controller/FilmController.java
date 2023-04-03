@@ -92,4 +92,15 @@ public class FilmController {
         log.info("Попытка получить список общих любимых фильмов пользователей с id: {} и {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
     }
+
+    @GetMapping("/search")
+    public List<Film> getSortedFilmByQuery(@RequestParam(value = "query", required = false) String query,
+                                            @RequestParam(value = "by", required = false) String by) {
+        if (query == null && by == null) {
+            log.info("Попытка получить топ 10 фильмов по популярности");
+            return filmService.getBestFilmsList(10);
+        }
+        log.info("Попытка получить фильмы, отсортированных по {}, имеющих подстроку {}", by, query);
+        return filmService.getSortedFilmByQuery(query, by);
+    }
 }

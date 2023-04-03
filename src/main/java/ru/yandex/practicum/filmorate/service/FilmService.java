@@ -162,6 +162,16 @@ public class FilmService {
         return filmStorage.getSortedFilmsByDirId(directorId, sort);
     }
 
+    public List<Film> getSortedFilmByQuery(String query, String by) {
+        if (!by.equals("director") &&
+                !by.equals("title") &&
+                !by.equals("director,title") &&
+                !by.equals("title,director")) {
+            throw new NotFoundException("Существует сортировка только по title или director или обоим сразу");
+        }
+        return filmStorage.getSortedFilmByQuery(query, by);
+    }
+
     private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn(logMessage, filmId);

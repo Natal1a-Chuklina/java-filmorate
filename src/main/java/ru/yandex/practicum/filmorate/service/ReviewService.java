@@ -30,11 +30,7 @@ public class ReviewService {
         throwExceptionIfUserDoesNotExist(
                 "Выполнена попытка создать отзыв для фильма пользователем с несуществующим id = {}.",
                 userId);
-        boolean hasUserAlreadyLeftReviewForFilm = getReviewsByFilmId(filmId, getAllReviews().size())
-                .stream()
-                .map(Review::getUserId)
-                .anyMatch(x -> x.equals(userId));
-        if (hasUserAlreadyLeftReviewForFilm) {
+        if (reviewStorage.hasUserAlreadyLeftReviewForFilm(filmId, userId)) {
             log.warn("Пользователь с id {} уже оставлял отзыв для фильма с id {}", userId, filmId);
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LEFT_REVIEW_FOR_FILM_MESSAGE,
                     userId, filmId));
@@ -85,12 +81,12 @@ public class ReviewService {
         throwExceptionIfUserDoesNotExist(
                 "Выполнена попытка поставить лайк отзыву пользователем с несуществующим id = {}.", userId);
 
-        if (reviewStorage.hasUserAlreadyLeftLikeForFilm(id, userId)) {
+        if (reviewStorage.hasUserAlreadyLeftLikeForReview(id, userId)) {
             log.warn("Пользователь с id {} уже оставлял лайк отзыву с id {}", userId, id);
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LEFT_LIKE_FOR_REVIEW_MESSAGE,
                     userId, id));
         }
-        if (reviewStorage.hasUserAlreadyLeftDislikeForFilm(id, userId)) {
+        if (reviewStorage.hasUserAlreadyLeftDislikeForReview(id, userId)) {
             log.info("Пользователь передумал");
             removeDislikeOfReview(id, userId);
         }
@@ -103,12 +99,12 @@ public class ReviewService {
         throwExceptionIfUserDoesNotExist(
                 "Выполнена попытка поставить дизлайк отзыву пользователем с несуществующим id = {}.", userId);
 
-        if (reviewStorage.hasUserAlreadyLeftDislikeForFilm(id, userId)) {
+        if (reviewStorage.hasUserAlreadyLeftDislikeForReview(id, userId)) {
             log.warn("Пользователь с id {} уже оставлял дизлайк отзыву с id {}", userId, id);
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LEFT_DISLIKE_FOR_REVIEW_MESSAGE,
                     userId, id));
         }
-        if (reviewStorage.hasUserAlreadyLeftLikeForFilm(id, userId)) {
+        if (reviewStorage.hasUserAlreadyLeftLikeForReview(id, userId)) {
             log.info("Пользователь передумал");
             removeLikeOfReview(id, userId);
         }
@@ -121,7 +117,7 @@ public class ReviewService {
         throwExceptionIfUserDoesNotExist(
                 "Выполнена попытка удалить лайк отзыву пользователем с несуществующим id = {}.", userId);
 
-        if (!reviewStorage.hasUserAlreadyLeftLikeForFilm(id, userId)) {
+        if (!reviewStorage.hasUserAlreadyLeftLikeForReview(id, userId)) {
             log.warn("Выполнена попытка удалить лайк отзыву пользователем, который его не оставлял.");
             throw new NotFoundException(String.format(Constants.USER_DID_NOT_LEAVE_LIKE_FOR_REVIEW_MESSAGE, userId, id));
         }
@@ -134,7 +130,7 @@ public class ReviewService {
         throwExceptionIfUserDoesNotExist(
                 "Выполнена попытка удалить дизлайк отзыву пользователем с несуществующим id = {}.", userId);
 
-        if (!reviewStorage.hasUserAlreadyLeftDislikeForFilm(id, userId)) {
+        if (!reviewStorage.hasUserAlreadyLeftDislikeForReview(id, userId)) {
             log.warn("Выполнена попытка удалить дизлайк отзыву пользователем, который его не оставлял.");
             throw new NotFoundException(String.format(Constants.USER_DID_NOT_LEAVE_DISLIKE_FOR_REVIEW_MESSAGE, userId, id));
         }

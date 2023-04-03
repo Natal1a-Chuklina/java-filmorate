@@ -27,7 +27,9 @@ public interface ReviewStorage {
 
     boolean isReviewExists(Integer id);
 
-    boolean hasUserAlreadyLeftLikeForFilm(Integer reviewId, Integer userId);
+    boolean hasUserAlreadyLeftLikeForReview(Integer reviewId, Integer userId);
 
-    boolean hasUserAlreadyLeftDislikeForFilm(Integer reviewId, Integer userId);
+    boolean hasUserAlreadyLeftDislikeForReview(Integer reviewId, Integer userId);
+
+    boolean hasUserAlreadyLeftReviewForFilm(Integer filmId, Integer userId);
 }

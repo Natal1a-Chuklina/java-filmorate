@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.EventUser;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.HistoryService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -14,9 +16,11 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final HistoryService historyService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, HistoryService historyService) {
         this.userService = userService;
+        this.historyService = historyService;
     }
 
     @GetMapping
@@ -71,5 +75,11 @@ public class UserController {
     public List<User> getSameFriendsList(@PathVariable int userId, @PathVariable int otherId) {
         log.info("Попытка получить список общих друзей пользователей с id: {} и {}", userId, otherId);
         return userService.getSameFriendsList(userId, otherId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public Collection<EventUser> getHistoryByUserId(@PathVariable int id) {
+        log.info("Попытка получить историю пользователя с id = {}", id);
+        return historyService.getHistoryUser(id);
     }
 }

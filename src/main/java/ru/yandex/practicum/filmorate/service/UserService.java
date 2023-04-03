@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.EventTypeStatus;
+import ru.yandex.practicum.filmorate.model.OperationStatus;
 import ru.yandex.practicum.filmorate.model.Status;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -20,9 +22,11 @@ import static ru.yandex.practicum.filmorate.Constants.USER_COULD_NOT_ADD_HIMSELF
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final HistoryService history;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, HistoryService history) {
         this.userStorage = userStorage;
+        this.history = history;
     }
 
     public Collection<User> getAll() {
@@ -94,6 +98,7 @@ public class UserService {
         } else {
             userStorage.addFriend(userId, friendId, Status.CONFIRMED);
             userStorage.addFriend(friendId, userId, Status.UNCONFIRMED);
+            history.createHistoryUser(userId, OperationStatus.ADD, EventTypeStatus.FRIEND, friendId);
         }
     }
 
@@ -107,6 +112,7 @@ public class UserService {
                 friendId);
 
         if (userStorage.isUserContainsFriend(userId, friendId)) {
+            history.createHistoryUser(userId, OperationStatus.REMOVE, EventTypeStatus.FRIEND, friendId);
             userStorage.deleteFriend(userId, friendId);
         } else {
             log.warn("Выполнена попытка удалить из друзей пользователей, которые не являются друзьями id: {} и {}",

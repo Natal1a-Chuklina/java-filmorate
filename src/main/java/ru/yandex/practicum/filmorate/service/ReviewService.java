@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.EventTypeStatus;
+import ru.yandex.practicum.filmorate.model.OperationStatus;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
@@ -20,6 +22,7 @@ public class ReviewService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final ReviewStorage reviewStorage;
+    private final HistoryService history;
 
     public Review createReview(Review review) {
         Integer userId = review.getUserId();
@@ -36,19 +39,26 @@ public class ReviewService {
                     userId, filmId));
         }
         review = reviewStorage.create(review);
+        history.createHistoryUser(review.getUserId(), OperationStatus.ADD, EventTypeStatus.REVIEW, review.getReviewId());
         log.info("Добавлен отзыв: {}", review);
         return review;
     }
 
     public Review updateReview(Review review) {
         throwExceptionIfReviewDoesNotExist(review.getReviewId());
+
         review = reviewStorage.update(review);
+        history.createHistoryUser(review.getUserId(), OperationStatus.UPDATE, EventTypeStatus.REVIEW, review.getReviewId());
         log.info("Обновлен отзыв: {}", review);
         return review;
     }
 
     public void removeReview(Integer id) {
         throwExceptionIfReviewDoesNotExist(id);
+
+        Review review = findReviewById(id);
+        history.createHistoryUser(review.getUserId(), OperationStatus.REMOVE, EventTypeStatus.REVIEW, review.getReviewId());
+
         int rows = reviewStorage.remove(id);
         if (rows > 0) {
             log.info("Отзыв с id {} был удален", id);

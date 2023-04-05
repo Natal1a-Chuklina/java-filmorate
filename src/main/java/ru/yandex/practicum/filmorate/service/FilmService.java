@@ -182,7 +182,7 @@ public class FilmService {
         if (year != null && year < 1895) {
             throw new NotFoundException("Дата выпуска фильма не может быть раньше 1895 года");
         }
-        return new ArrayList<>(filmStorage.getFilteredBestFilms(count, genreId, year));
+        return filmStorage.getFilteredBestFilms(count, genreId, year);
     }
 
     private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {

@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.EventUser;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.HistoryService;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -16,9 +16,9 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private final HistoryService historyService;
+    private final EventService historyService;
 
-    public UserController(UserService userService, HistoryService historyService) {
+    public UserController(UserService userService, EventService historyService) {
         this.userService = userService;
         this.historyService = historyService;
     }
@@ -78,8 +78,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public Collection<EventUser> getHistoryByUserId(@PathVariable int id) {
+    public Collection<Event> getHistoryByUserId(@PathVariable int id) {
         log.info("Попытка получить историю пользователя с id = {}", id);
-        return historyService.getHistoryUser(id);
+        return historyService.getEvents(id);
     }
 }

@@ -24,16 +24,16 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final DirectorStorage directorStorage;
-    private final HistoryService history;
+    private final EventService eventService;
 
     public FilmService(FilmStorage filmStorage, UserStorage userStorage, GenreStorage genreStorage,
-                       MpaStorage mpaStorage, DirectorStorage directorStorage, HistoryService history) {
+                       MpaStorage mpaStorage, DirectorStorage directorStorage, EventService eventService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.directorStorage = directorStorage;
-        this.history = history;
+        this.eventService = eventService;
     }
 
     public Collection<Film> getAll() {
@@ -64,10 +64,8 @@ public class FilmService {
     }
 
     public void deleteFilm(int filmId) {
-        if (!filmStorage.isFilmExists(filmId)) {
-            log.warn("Выполнена попытка удалить фильм по несуществующему id = {}", filmId);
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
-        }
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка удалить фильм по несуществующему id = {}", filmId);
 
         filmStorage.delete(filmId);
     }
@@ -86,7 +84,7 @@ public class FilmService {
                     filmId, userId);
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LIKED_FILM_MESSAGE, userId, filmId));
         } else {
-            history.createHistoryUser(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
+            eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
             filmStorage.addLike(filmId, userId);
         }
     }
@@ -100,7 +98,7 @@ public class FilmService {
                 "Выполнена попытка удалить лайк фильму пользователем с несуществующим id = {}.",
                 userId);
         if (filmStorage.isFilmContainsUserLike(filmId, userId)) {
-            history.createHistoryUser(userId, OperationStatus.REMOVE, EventTypeStatus.LIKE, filmId);
+            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.LIKE, filmId);
             filmStorage.deleteLike(filmId, userId);
         } else {
             log.warn("Выполнена попытка удалить несуществующий лайк у фильма с id = {} пользователем с id = {}",

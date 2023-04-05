@@ -22,7 +22,7 @@ public class ReviewService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final ReviewStorage reviewStorage;
-    private final HistoryService history;
+    private final EventService eventService;
 
     public Review createReview(Review review) {
         Integer userId = review.getUserId();
@@ -39,7 +39,7 @@ public class ReviewService {
                     userId, filmId));
         }
         review = reviewStorage.create(review);
-        history.createHistoryUser(review.getUserId(), OperationStatus.ADD, EventTypeStatus.REVIEW, review.getReviewId());
+        eventService.createEvent(review.getUserId(), OperationStatus.ADD, EventTypeStatus.REVIEW, review.getReviewId());
         log.info("Добавлен отзыв: {}", review);
         return review;
     }
@@ -48,7 +48,7 @@ public class ReviewService {
         throwExceptionIfReviewDoesNotExist(review.getReviewId());
 
         review = reviewStorage.update(review);
-        history.createHistoryUser(review.getUserId(), OperationStatus.UPDATE, EventTypeStatus.REVIEW, review.getReviewId());
+        eventService.createEvent(review.getUserId(), OperationStatus.UPDATE, EventTypeStatus.REVIEW, review.getReviewId());
         log.info("Обновлен отзыв: {}", review);
         return review;
     }
@@ -57,7 +57,7 @@ public class ReviewService {
         throwExceptionIfReviewDoesNotExist(id);
 
         Review review = findReviewById(id);
-        history.createHistoryUser(review.getUserId(), OperationStatus.REMOVE, EventTypeStatus.REVIEW, review.getReviewId());
+        eventService.createEvent(review.getUserId(), OperationStatus.REMOVE, EventTypeStatus.REVIEW, review.getReviewId());
 
         int rows = reviewStorage.remove(id);
         if (rows > 0) {

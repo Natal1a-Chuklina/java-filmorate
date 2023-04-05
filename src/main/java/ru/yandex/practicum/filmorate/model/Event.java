@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class EventUser {
+public class Event {
     private int eventId;
     private Long timestamp;
     private int userId;

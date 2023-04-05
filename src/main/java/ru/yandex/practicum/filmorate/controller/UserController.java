@@ -16,11 +16,11 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private final EventService historyService;
+    private final EventService eventService;
 
-    public UserController(UserService userService, EventService historyService) {
+    public UserController(UserService userService, EventService eventService) {
         this.userService = userService;
-        this.historyService = historyService;
+        this.eventService = eventService;
     }
 
     @GetMapping
@@ -80,6 +80,6 @@ public class UserController {
     @GetMapping("/{id}/feed")
     public Collection<Event> getHistoryByUserId(@PathVariable int id) {
         log.info("Попытка получить историю пользователя с id = {}", id);
-        return historyService.getEvents(id);
+        return eventService.getEvents(id);
     }
 }

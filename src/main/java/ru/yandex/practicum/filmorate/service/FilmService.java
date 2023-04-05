@@ -172,6 +172,10 @@ public class FilmService {
         return filmStorage.getSortedFilmByQuery(query, by);
     }
 
+    public List<Film> getFilteredBestFilms(int count, String genreId, String year) {
+        return new ArrayList<>(filmStorage.getFilteredBestFilms(count, genreId, year));
+    }
+
     private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn(logMessage, filmId);

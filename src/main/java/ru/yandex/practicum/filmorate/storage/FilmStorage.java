@@ -31,4 +31,6 @@ public interface FilmStorage {
     Collection<Film> getCommonFilms(int userId, int friendId);
 
     List<Film> getSortedFilmByQuery(String query, String by);
+
+    List<Film> getFilteredBestFilms(int count, String genreId, String year);
 }

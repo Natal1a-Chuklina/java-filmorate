@@ -326,6 +326,72 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, filmMapper, query, query);
     }
 
+    @Override
+    public List<Film> getFilteredBestFilms(int count, String genreId, String year) {
+        String sql =
+                "SELECT f.id, " +
+                        "       f.name, " +
+                        "       f.description, " +
+                        "       f.release_date, " +
+                        "       f.duration, " +
+                        "       r.id AS rating_id, " +
+                        "       r.name AS rating_name, " +
+                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
+                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
+                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
+                        "FROM films AS f " +
+                        "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                        "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                        "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                        "LEFT JOIN likes AS l ON l.film_id = f.id " +
+                        "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
+                        "LEFT JOIN director AS d ON d.director_id = f_d.director_id ";
+        if (year == null && genreId == null) {
+            sql = sql +
+                    "GROUP BY f.id " +
+                    "ORDER BY count(DISTINCT(l.user_id)) DESC " +
+                    "LIMIT ?";
+            log.info("Получен топ {} фильмов из базы", count);
+            return jdbcTemplate.query(sql, filmMapper, count);
+        }
+        if (genreId == null) {
+            sql = sql +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +
+                    "GROUP BY f.id " +
+                    "ORDER BY count(DISTINCT(l.user_id)) DESC " +
+                    "LIMIT ?";
+            log.info("Получен топ {} фильмов из базы, где год выпуска = {}", count, year);
+            return jdbcTemplate.query(sql, filmMapper, year, count);
+        }
+        if (year == null) {
+            sql = sql +
+                    "WHERE f.id IN (SELECT f.id " +
+                    "               FROM films AS f " +
+                    "               LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                    "               LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                    "               WHERE f_g.genre_id = ? " +
+                    "               GROUP BY f.id) " +
+                    "GROUP BY f.id " +
+                    "ORDER BY count(DISTINCT(l.user_id)) DESC " +
+                    "LIMIT ?";
+            log.info("Получен топ {} фильмов из базы, где id жанра = {}", count, genreId);
+            return jdbcTemplate.query(sql, filmMapper, genreId, count);
+        }
+        sql = sql +
+                "WHERE f.id IN (SELECT f.id " +
+                "               FROM films AS f " +
+                "               LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                "               LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                "               WHERE f_g.genre_id = ? " +
+                "               GROUP BY f.id) " +
+                "AND EXTRACT(YEAR FROM f.release_date) = ? " +
+                "GROUP BY f.id " +
+                "ORDER BY count(DISTINCT(l.user_id)) DESC " +
+                "LIMIT ?";
+        log.info("Получен список топ {} фильмов из базы, где id жанра = {} и год выпуска = {}", count, genreId, year);
+        return jdbcTemplate.query(sql, filmMapper, genreId, year, count);
+    }
+
     private void addGenres(Set<Genre> genres, int filmId) {
         for (Genre genre : genres) {
             String sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?);";

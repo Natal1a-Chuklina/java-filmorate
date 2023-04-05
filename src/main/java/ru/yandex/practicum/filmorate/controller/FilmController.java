@@ -77,8 +77,8 @@ public class FilmController {
     public List<Film> getFilteredBestFilms(
             @RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
             @Positive int count,
-            @RequestParam(required = false) String genreId,
-            @RequestParam(required = false) String year) {
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
         return filmService.getFilteredBestFilms(count, genreId, year);
     }
 

@@ -327,7 +327,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilteredBestFilms(int count, String genreId, String year) {
+    public List<Film> getFilteredBestFilms(int count, Integer genreId, Integer year) {
         String sql =
                 "SELECT f.id, " +
                         "       f.name, " +

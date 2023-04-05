@@ -172,14 +172,14 @@ public class FilmService {
         return filmStorage.getSortedFilmByQuery(query, by);
     }
 
-    public List<Film> getFilteredBestFilms(int count, String genreId, String year) {
+    public List<Film> getFilteredBestFilms(int count, Integer genreId, Integer year) {
         if (genreId == null && year == null) {
             return new ArrayList<>(filmStorage.getBestFilms(count));
         }
-        if (genreId != null && (Integer.parseInt(genreId) > 6 || Integer.parseInt(genreId) < 1)) {
+        if (genreId != null && (genreId > 6 || genreId < 1)) {
             throw new NotFoundException("Id жанра может быть только от 1 до 6");
         }
-        if (year != null && Integer.parseInt(year) < 1895) {
+        if (year != null && year < 1895) {
             throw new NotFoundException("Дата выпуска фильма не может быть раньше 1895 года");
         }
         return new ArrayList<>(filmStorage.getFilteredBestFilms(count, genreId, year));

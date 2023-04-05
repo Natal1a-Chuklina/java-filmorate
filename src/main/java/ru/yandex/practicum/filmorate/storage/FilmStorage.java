@@ -32,5 +32,5 @@ public interface FilmStorage {
 
     List<Film> getSortedFilmByQuery(String query, String by);
 
-    List<Film> getFilteredBestFilms(int count, String genreId, String year);
+    List<Film> getFilteredBestFilms(int count, Integer genreId, Integer year);
 }

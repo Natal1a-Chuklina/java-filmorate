@@ -346,14 +346,6 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN likes AS l ON l.film_id = f.id " +
                         "LEFT JOIN film_director AS f_d ON f.id = f_d.film_id " +
                         "LEFT JOIN director AS d ON d.director_id = f_d.director_id ";
-        if (year == null && genreId == null) {
-            sql = sql +
-                    "GROUP BY f.id " +
-                    "ORDER BY count(DISTINCT(l.user_id)) DESC " +
-                    "LIMIT ?";
-            log.info("Получен топ {} фильмов из базы", count);
-            return jdbcTemplate.query(sql, filmMapper, count);
-        }
         if (genreId == null) {
             sql = sql +
                     "WHERE EXTRACT(YEAR FROM f.release_date) = ? " +

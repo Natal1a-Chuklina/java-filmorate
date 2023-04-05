@@ -172,6 +172,19 @@ public class FilmService {
         return filmStorage.getSortedFilmByQuery(query, by);
     }
 
+    public List<Film> getFilteredBestFilms(int count, Integer genreId, Integer year) {
+        if (genreId == null && year == null) {
+            return new ArrayList<>(filmStorage.getBestFilms(count));
+        }
+        if (genreId != null && (genreId > 6 || genreId < 1)) {
+            throw new NotFoundException("Id жанра может быть только от 1 до 6");
+        }
+        if (year != null && year < 1895) {
+            throw new NotFoundException("Дата выпуска фильма не может быть раньше 1895 года");
+        }
+        return filmStorage.getFilteredBestFilms(count, genreId, year);
+    }
+
     private void throwExceptionIfFilmDoesNotExist(String logMessage, int filmId) {
         if (!filmStorage.isFilmExists(filmId)) {
             log.warn(logMessage, filmId);

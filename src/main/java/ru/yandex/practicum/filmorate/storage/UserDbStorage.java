@@ -209,30 +209,4 @@ public class UserDbStorage implements UserStorage {
         log.info("Получен из базы список общих друзей пользователей с id: {} и {}", userId, otherId);
         return jdbcTemplate.query(sql, userMapper, userId, otherId);
     }
-
-    @Override
-    public Collection<Integer> getSimilarInterestUsers(int userId) {
-        String sql =
-                "SELECT user_id FROM likes " +                          // Насколько я понял алгоритм, нам нужно найти
-                        "WHERE user_id <> ? " +                         // юзеров с максимальным кол-вом пересечений по
-                        "  AND film_id IN ( " +                         // по лайкам с искомым юзером, а брать во внимание
-                        "    SELECT film_id FROM LIKES " +              // только этих полбзователей для того, чтобы не
-                        "    WHERE user_id = ? " +                      // переносить эту логику в сервис и не запрашивать
-                        ") " +                                          // большое кол-во данных из БД.
-                        "GROUP BY user_id " +
-                        "HAVING COUNT(1) IN ( " +
-                        "    SELECT DISTINCT (COUNT(1)) FROM likes " +  // В данном подзапросе ищем максимальное
-                        "    WHERE film_id IN ( " +                     // число пересечений по лайкам с искомым
-                        "        SELECT film_id FROM likes " +          // юзером и следующее за максимальным,
-                        "        WHERE user_id = ? " +                  // на случай если у юзеров будет одни и
-                        "        ) " +                                  // те же лайки что и у искомого юзера
-                        "      AND user_id <> ? " +
-                        "    GROUP BY user_id " +
-                        "    ORDER BY COUNT(1) DESC " +
-                        "    LIMIT 2" +
-                        ") ";
-
-        log.info("Получен список всех пользователей со схожими интересами с пользователем с id = {}", userId);
-        return jdbcTemplate.queryForList(sql, Integer.class, userId, userId, userId, userId);
-    }
 }

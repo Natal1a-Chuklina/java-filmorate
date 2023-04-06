@@ -434,32 +434,53 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getLikesByUserId(int userId) {
-        String sql =
-                "SELECT f.id, " +
-                        "       f.name, " +
-                        "       f.description, " +
-                        "       f.release_date, " +
-                        "       f.duration, " +
-                        "       r.id AS rating_id, " +
-                        "       r.name AS rating_name, " +
-                        "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name ORDER BY f_g.genre_id) AS genres_data, " +
-                        "       array_agg(DISTINCT l.user_id ORDER BY l.user_id) AS likes_data, " +
-                        "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name ORDER BY f_d.director_id) AS directors_data " +
-                        "FROM films AS f " +
-                        "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
-                        "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
-                        "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
-                        "LEFT JOIN likes AS l ON f.id = l.film_id " +
-                        "LEFT JOIN film_director AS f_d ON f_d.film_id = f.id " +
-                        "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
-                        "WHERE f.id in ( " +
-                        "       SELECT film_id FROM likes " +
-                        "       WHERE user_id = ? " +
-                        ") " +
-                        "GROUP BY f.id;";
+    public Collection<Film> getRecommendations(int userId) {
+        String sql = "SELECT f.id, " +
+                "       f.name, " +
+                "       f.description, " +
+                "       f.release_date, " +
+                "       f.duration, " +
+                "       r.id AS rating_id, " +
+                "       r.name AS rating_name, " +
+                "       array_agg(DISTINCT f_g.genre_id || ' ' || g.name " +
+                "                 ORDER BY f_g.genre_id) AS genres_data, " +
+                "       array_agg(DISTINCT l.user_id " +
+                "                 ORDER BY l.user_id) AS likes_data, " +
+                "       array_agg(DISTINCT f_d.director_id || ',' || d.director_name " +
+                "                 ORDER BY f_d.director_id) AS directors_data " +
+                "FROM films AS f " +
+                "LEFT JOIN ratings AS r ON r.id = f.rating_id " +
+                "LEFT JOIN film_genre AS f_g ON f_g.film_id = f.id " +
+                "LEFT JOIN genres AS g ON g.id = f_g.genre_id " +
+                "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "LEFT JOIN film_director AS f_d ON f_d.film_id = f.id " +
+                "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
+                "WHERE f.id not in " +
+                "    (SELECT film_id " +
+                "     FROM likes " +
+                "     WHERE user_id = ?) " +
+                "  AND l.user_id in ( " +
+                "  SELECT user_id " +
+                "  FROM likes WHERE user_id <> ? " +
+                "  AND film_id IN " +
+                "    (SELECT film_id " +
+                "     FROM LIKES " +
+                "     WHERE user_id = ?) " +
+                "GROUP BY user_id " +
+                "HAVING COUNT(1) IN " +
+                "  (SELECT DISTINCT (COUNT(1)) " +      // В данном подзапросе ищем максимальное
+                "   FROM likes " +                      // число пересечений по лайкам с искомым
+                "   WHERE film_id IN " +                // юзером и следующее за максимальным,
+                "       (SELECT film_id " +             // на случай если у юзеров будут одни и
+                "        FROM likes " +                 // те же лайки что и у искомого юзера
+                "        WHERE user_id = ?) " +
+                "     AND user_id <> ? " +
+                "   GROUP BY user_id " +
+                "   ORDER BY COUNT(1) DESC " +
+                "   LIMIT 2)) " +
+                "GROUP BY f.id " +
+                "ORDER BY count(DISTINCT(l.user_id)) DESC;";
 
-        log.info("Получен список фильмов c лайками от пользователя с id = {}", userId);
-        return jdbcTemplate.query(sql, filmMapper, userId);
+        return jdbcTemplate.query(sql, filmMapper, userId, userId, userId, userId, userId);
     }
 }

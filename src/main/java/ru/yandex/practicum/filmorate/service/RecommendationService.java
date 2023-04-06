@@ -9,13 +9,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.function.UnaryOperator.identity;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @Slf4j
@@ -34,17 +27,9 @@ public class RecommendationService {
             throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
         }
 
-        Collection<Film> userLikes = filmStorage.getLikesByUserId(userId);
+        Collection<Film> films = filmStorage.getRecommendations(userId);
+        log.info("Пользователь с id = {} получил список рекомендуемых фильмов длиной {}", userId, films.size());
 
-        return userStorage.getSimilarInterestUsers(userId).stream() // получение спикска пользователей со схожими интересами
-                .map(filmStorage::getLikesByUserId) // получение списков фильмов с лайками от каждого ползователя
-                .flatMap(Collection::stream) // объединение всех фильмов в общий список
-                .filter(film -> !userLikes.contains(film)) // удаление фильмов с лайками от субъекта
-                .collect(groupingBy(identity(), counting())) // формирование мапы с фильмом и кол-вом его лайков от пользователе из выборки
-                .entrySet()
-                .stream()
-                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue())) //сортировка по кол-ву лайков
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        return films;
     }
 }

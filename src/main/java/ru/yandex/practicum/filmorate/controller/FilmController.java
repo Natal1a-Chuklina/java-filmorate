@@ -74,10 +74,12 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getBestFilmsList(@RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
-                                       @Positive int count) {
-        log.info("Попытка получить топ {} фильмов", count);
-        return filmService.getBestFilmsList(count);
+    public List<Film> getFilteredBestFilms(
+            @RequestParam(defaultValue = DEFAULT_BEST_FILMS_COUNT)
+            @Positive int count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
+        return filmService.getFilteredBestFilms(count, genreId, year);
     }
 
     @GetMapping("/director/{directorId}")
@@ -91,5 +93,16 @@ public class FilmController {
     public List<Film> getCommonFilms(@RequestParam int userId, @RequestParam int friendId) {
         log.info("Попытка получить список общих любимых фильмов пользователей с id: {} и {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/search")
+    public List<Film> getSortedFilmByQuery(@RequestParam(value = "query", required = false) String query,
+                                           @RequestParam(value = "by", required = false) String by) {
+        if (query == null && by == null) {
+            log.info("Попытка получить топ 10 фильмов по популярности");
+            return filmService.getBestFilmsList(10);
+        }
+        log.info("Попытка получить фильмы, отсортированных по {}, имеющих подстроку {}", by, query);
+        return filmService.getSortedFilmByQuery(query, by);
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.EventTypeStatus;
+import ru.yandex.practicum.filmorate.model.OperationStatus;
 import ru.yandex.practicum.filmorate.model.Status;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -20,9 +22,11 @@ import static ru.yandex.practicum.filmorate.Constants.USER_COULD_NOT_ADD_HIMSELF
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final EventService eventService;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, EventService eventService) {
         this.userStorage = userStorage;
+        this.eventService = eventService;
     }
 
     public Collection<User> getAll() {
@@ -64,10 +68,8 @@ public class UserService {
     }
 
     public void deleteUser(int userId) {
-        if (!userStorage.isUserExistsById(userId)) {
-            log.warn("Выполнена попытка удалить пользователя по несущестующему id = {}", userId);
-            throw new NotFoundException(String.format(Constants.USER_NOT_FOUND_MESSAGE, userId));
-        }
+        throwExceptionIfUserDoesNotExist(
+                "Выполнена попытка удалить пользователя по несущестующему id = {}", userId);
 
         userStorage.delete(userId);
     }
@@ -94,6 +96,7 @@ public class UserService {
         } else {
             userStorage.addFriend(userId, friendId, Status.CONFIRMED);
             userStorage.addFriend(friendId, userId, Status.UNCONFIRMED);
+            eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.FRIEND, friendId);
         }
     }
 
@@ -108,6 +111,7 @@ public class UserService {
 
         if (userStorage.isUserContainsFriend(userId, friendId)) {
             userStorage.deleteFriend(userId, friendId);
+            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.FRIEND, friendId);
         } else {
             log.warn("Выполнена попытка удалить из друзей пользователей, которые не являются друзьями id: {} и {}",
                     userId, friendId);

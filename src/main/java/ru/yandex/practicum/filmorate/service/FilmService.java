@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
@@ -27,14 +24,16 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final DirectorStorage directorStorage;
+    private final EventService eventService;
 
     public FilmService(FilmStorage filmStorage, UserStorage userStorage, GenreStorage genreStorage,
-                       MpaStorage mpaStorage, DirectorStorage directorStorage) {
+                       MpaStorage mpaStorage, DirectorStorage directorStorage, EventService eventService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.directorStorage = directorStorage;
+        this.eventService = eventService;
     }
 
     public Collection<Film> getAll() {
@@ -65,10 +64,8 @@ public class FilmService {
     }
 
     public void deleteFilm(int filmId) {
-        if (!filmStorage.isFilmExists(filmId)) {
-            log.warn("Выполнена попытка удалить фильм по несуществующему id = {}", filmId);
-            throw new NotFoundException(String.format(Constants.FILM_NOT_FOUND_MESSAGE, filmId));
-        }
+        throwExceptionIfFilmDoesNotExist(
+                "Выполнена попытка удалить фильм по несуществующему id = {}", filmId);
 
         filmStorage.delete(filmId);
     }
@@ -88,6 +85,7 @@ public class FilmService {
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LIKED_FILM_MESSAGE, userId, filmId));
         } else {
             filmStorage.addLike(filmId, userId);
+            eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
         }
     }
 
@@ -99,9 +97,9 @@ public class FilmService {
         throwExceptionIfUserDoesNotExist(
                 "Выполнена попытка удалить лайк фильму пользователем с несуществующим id = {}.",
                 userId);
-
         if (filmStorage.isFilmContainsUserLike(filmId, userId)) {
             filmStorage.deleteLike(filmId, userId);
+            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.LIKE, filmId);
         } else {
             log.warn("Выполнена попытка удалить несуществующий лайк у фильма с id = {} пользователем с id = {}",
                     filmId, userId);

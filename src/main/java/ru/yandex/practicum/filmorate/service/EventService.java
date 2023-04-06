@@ -42,8 +42,8 @@ public class EventService {
                 .entityId(entityId)
                 .build();
 
-            eventDbStorage.add(eventUser);
-            log.info("История действий пользователя с id = {} сохранена.", userId);
+        eventDbStorage.add(eventUser);
+        log.info("История действий пользователя с id = {} сохранена.", userId);
     }
 
     private void throwExceptionIfUserDoesNotExist(String logMessage, int userId) {

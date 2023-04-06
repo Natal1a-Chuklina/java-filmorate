@@ -37,7 +37,7 @@ public class RecommendationService {
         Collection<Film> userLikes = filmStorage.getLikesByUserId(userId);
 
         return userStorage.getSimilarInterestUsers(userId).stream() // получение спикска пользователей со схожими интересами
-                .map(user -> filmStorage.getLikesByUserId(user.getId())) // получение списков фильмов с лайками от каждого ползователя
+                .map(filmStorage::getLikesByUserId) // получение списков фильмов с лайками от каждого ползователя
                 .flatMap(Collection::stream) // объединение всех фильмов в общий список
                 .filter(film -> !userLikes.contains(film)) // удаление фильмов с лайками от субъекта
                 .collect(groupingBy(identity(), counting())) // формирование мапы с фильмом и кол-вом его лайков от пользователе из выборки

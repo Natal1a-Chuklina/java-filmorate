@@ -1458,7 +1458,7 @@ class FilmorateApplicationTests {
     @Sql(scripts = "classpath:db/clearDb.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void testGettingSimilarInterestsForNotExistingUsers() {
         assertThatCode(() -> {
-            Collection<User> interestUsers = userStorage.getSimilarInterestUsers(1);
+            Collection<Integer> interestUsers = userStorage.getSimilarInterestUsers(1);
 
             assertThat(interestUsers)
                     .as("Проверка получения списка пользователя со схожими интересами для пользователя с несуществующим id")
@@ -1501,7 +1501,7 @@ class FilmorateApplicationTests {
             int userId = createUserInDb(email1, login1, name1, birthday1);
             createUserInDb(email2, login2, name2, birthday2);
 
-            Collection<User> interestUsers = userStorage.getSimilarInterestUsers(userId);
+            Collection<Integer> interestUsers = userStorage.getSimilarInterestUsers(userId);
 
             assertThat(interestUsers)
                     .as("Проверка получения списка пользователя со схожими интересами для пользователя с без лайков")
@@ -1546,7 +1546,7 @@ class FilmorateApplicationTests {
             filmStorage.addLike(filmId1, userId1);
             filmStorage.addLike(filmId2, userId2);
 
-            Collection<User> interestUsers = userStorage.getSimilarInterestUsers(userId1);
+            Collection<Integer> interestUsers = userStorage.getSimilarInterestUsers(userId1);
 
             assertThat(interestUsers)
                     .as("Проверка получения списка пользователей со схожими интересами для пользователем без общих лайков")
@@ -1593,14 +1593,14 @@ class FilmorateApplicationTests {
             filmStorage.addLike(filmId2, userId2);
             User expectedUser = new User(userId2, email2, login2, name2, birthday2);
 
-            Collection<User> interestUsers = userStorage.getSimilarInterestUsers(userId1);
+            Collection<Integer> interestUsers = userStorage.getSimilarInterestUsers(userId1);
 
             assertThat(interestUsers)
                     .as("Проверка получения списка пользователей со схожими интересами для пользователя с одним общим лайком")
                     .isNotNull()
                     .asList()
                     .hasSize(1)
-                    .contains(expectedUser);
+                    .contains(expectedUser.getId());
         }).doesNotThrowAnyException();
     }
 }

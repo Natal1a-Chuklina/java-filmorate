@@ -211,39 +211,28 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getSimilarInterestUsers(int userId) {
+    public Collection<Integer> getSimilarInterestUsers(int userId) {
         String sql =
-                "SELECT u.id, " +
-                        "       u.name, " +
-                        "       u.login, " +
-                        "       u.email, " +
-                        "       u.birthday, " +
-                        "       array_agg(f.friend_2_id || ' ' || s.name) AS friends_data " +
-                        "FROM users AS u " +
-                        "         LEFT JOIN friends AS f ON f.friend_1_id = u.id " +
-                        "         LEFT JOIN statuses AS s ON s.id = f.status_id " +
-                        "WHERE u.id IN ( " +
-                        "    SELECT user_id FROM ( " +
-                        "        SELECT user_id, COUNT(1) AS CNT FROM likes " +
-                        "        WHERE user_id <> ? " +
-                        "          AND film_id IN ( " +
-                        "            select film_id from LIKES where user_id = ? " +
-                        "            ) " +
-                        "        GROUP BY user_id " +
-                        "        HAVING CNT=( " +
-                        "            SELECT COUNT(1) FROM likes " +
-                        "            WHERE film_id IN ( " +
-                        "                select film_id from likes " +
-                        "                where user_id = ? " +
-                        "                ) " +
-                        "            GROUP BY user_id " +
-                        "            ORDER BY CNT LIMIT 1) " +
-                        "        ORDER BY CNT DESC " +
-                        "        ) " +
-                        "    ) " +
-                        "GROUP BY u.id;";
+                "SELECT user_id FROM likes " +                          // Насколько я понял алгоритм, нам нужно найти
+                        "WHERE user_id <> ? " +                         // юзеров с максимальным кол-вом пересечений по
+                        "  AND film_id IN ( " +                         // по лайкам с искомым юзером, а брать во внимание
+                        "    SELECT film_id FROM LIKES " +              // только этих полбзователей для того, чтобы не
+                        "    WHERE user_id = ? " +                      // переносить эту логику в сервис и не запрашивать
+                        ") " +                                          // большое кол-во данных из БД.
+                        "GROUP BY user_id " +
+                        "HAVING COUNT(1) IN ( " +
+                        "    SELECT DISTINCT (COUNT(1)) FROM likes " +  // В данном подзапросе ищем максимальное
+                        "    WHERE film_id IN ( " +                     // число пересечений по лайкам с искомым
+                        "        SELECT film_id FROM likes " +          // юзером и следующее за максимальным,
+                        "        WHERE user_id = ? " +                  // на случай если у юзеров будет одни и
+                        "        ) " +                                  // те же лайки что и у искомого юзера
+                        "      AND user_id <> ? " +
+                        "    GROUP BY user_id " +
+                        "    ORDER BY COUNT(1) DESC " +
+                        "    LIMIT 2" +
+                        ") ";
 
         log.info("Получен список всех пользователей со схожими интересами с пользователем с id = {}", userId);
-        return jdbcTemplate.query(sql, userMapper, userId, userId, userId);
+        return jdbcTemplate.queryForList(sql, Integer.class, userId, userId, userId, userId);
     }
 }

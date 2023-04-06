@@ -30,5 +30,5 @@ public interface UserStorage {
 
     Collection<User> getCommonFriends(int userId, int otherId);
 
-    Collection<User> getSimilarInterestUsers(int userId);
+    Collection<Integer> getSimilarInterestUsers(int userId);
 }

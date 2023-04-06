@@ -348,7 +348,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getLikesByUserId(int userId) {
         String sql =
-                        "SELECT f.id, " +
+                "SELECT f.id, " +
                         "       f.name, " +
                         "       f.description, " +
                         "       f.release_date, " +
@@ -366,14 +366,12 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN film_director AS f_d ON f_d.film_id = f.id " +
                         "LEFT JOIN director AS d ON d.director_id = f_d.director_id " +
                         "WHERE f.id in ( " +
-                        "       SELECT f2.id FROM films AS f2 " +
-                        "           LEFT JOIN likes AS l2 ON f2.ID = l2.FILM_ID " +
-                        "       WHERE l2.user_id = ? " +
+                        "       SELECT film_id FROM likes " +
+                        "       WHERE user_id = ? " +
                         ") " +
                         "GROUP BY f.id;";
 
         log.info("Получен список фильмов c лайками от пользователя с id = {}", userId);
         return jdbcTemplate.query(sql, filmMapper, userId);
     }
-
 }

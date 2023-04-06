@@ -39,7 +39,7 @@ public class ReviewService {
                     userId, filmId));
         }
         review = reviewStorage.create(review);
-        eventService.createEvent(review.getUserId(), OperationStatus.ADD, EventTypeStatus.REVIEW, review.getReviewId());
+        eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.REVIEW, review.getReviewId());
         log.info("Добавлен отзыв: {}", review);
         return review;
     }
@@ -57,11 +57,11 @@ public class ReviewService {
         throwExceptionIfReviewDoesNotExist(id);
 
         Review review = findReviewById(id);
-        eventService.createEvent(review.getUserId(), OperationStatus.REMOVE, EventTypeStatus.REVIEW, review.getReviewId());
 
         int rows = reviewStorage.remove(id);
         if (rows > 0) {
             log.info("Отзыв с id {} был удален", id);
+            eventService.createEvent(review.getUserId(), OperationStatus.REMOVE, EventTypeStatus.REVIEW, review.getReviewId());
         }
     }
 

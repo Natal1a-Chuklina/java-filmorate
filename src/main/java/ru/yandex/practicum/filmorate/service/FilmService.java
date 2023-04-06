@@ -84,8 +84,8 @@ public class FilmService {
                     filmId, userId);
             throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LIKED_FILM_MESSAGE, userId, filmId));
         } else {
-            eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
             filmStorage.addLike(filmId, userId);
+            eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
         }
     }
 
@@ -98,8 +98,8 @@ public class FilmService {
                 "Выполнена попытка удалить лайк фильму пользователем с несуществующим id = {}.",
                 userId);
         if (filmStorage.isFilmContainsUserLike(filmId, userId)) {
-            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.LIKE, filmId);
             filmStorage.deleteLike(filmId, userId);
+            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.LIKE, filmId);
         } else {
             log.warn("Выполнена попытка удалить несуществующий лайк у фильма с id = {} пользователем с id = {}",
                     filmId, userId);

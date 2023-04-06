@@ -110,8 +110,8 @@ public class UserService {
                 friendId);
 
         if (userStorage.isUserContainsFriend(userId, friendId)) {
-            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.FRIEND, friendId);
             userStorage.deleteFriend(userId, friendId);
+            eventService.createEvent(userId, OperationStatus.REMOVE, EventTypeStatus.FRIEND, friendId);
         } else {
             log.warn("Выполнена попытка удалить из друзей пользователей, которые не являются друзьями id: {} и {}",
                     userId, friendId);

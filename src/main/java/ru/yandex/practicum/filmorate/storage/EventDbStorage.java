@@ -39,6 +39,6 @@ public class EventDbStorage implements EventStorage {
                 event.getEventType().toString(),
                 event.getOperation().toString()
         );
-        log.info("Данные о действии занесены в историю");
+        log.info("Данные о действии пользователя с id = {} занесены в историю",event.getUserId());
     }
 }

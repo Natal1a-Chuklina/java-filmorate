@@ -82,11 +82,11 @@ public class FilmService {
         if (filmStorage.isFilmContainsUserLike(filmId, userId)) {
             log.warn("Выполнена попытка повторно поставить лайк фильму с id = {} пользователем с id = {}",
                     filmId, userId);
-            throw new AlreadyExistException(String.format(Constants.USER_ALREADY_LIKED_FILM_MESSAGE, userId, filmId));
         } else {
             filmStorage.addLike(filmId, userId);
-            eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
         }
+
+        eventService.createEvent(userId, OperationStatus.ADD, EventTypeStatus.LIKE, filmId);
     }
 
     public void deleteLike(int filmId, int userId) {

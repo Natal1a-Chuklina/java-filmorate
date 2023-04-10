@@ -265,11 +265,10 @@ public class FilmDbStorage implements FilmStorage {
                         "WHERE f.id in " +
                         "      (SELECT l_1.film_id " +
                         "       FROM likes AS l_1 " +
-                        "       INNER JOIN " +
-                        "         (SELECT film_id " +
-                        "          FROM likes " +
-                        "          WHERE user_id = ?) AS l_2 ON l_1.film_id = l_2.film_id " +
-                        "       WHERE l_1.user_id = ?) " +
+                        "       LEFT JOIN likes AS l_2 ON l_1.film_id = l_2.film_id " +
+                        "       WHERE (l_1.user_id = ? " +
+                        "              AND l_2.user_id = ?) " +
+                        "       GROUP BY l_1.film_id) " +
                         "GROUP BY f.id " +
                         "ORDER BY count(DISTINCT(l.user_id)) DESC, " +
                         "         f.name;";

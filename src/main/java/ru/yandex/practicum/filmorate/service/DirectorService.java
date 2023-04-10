@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.Constants;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -22,8 +23,14 @@ public class DirectorService {
     }
 
     public Director getDirectorById(long id) {
-        checkDirectorExists(id);
-        return directorStorage.getDirectorById(id);
+        try {
+            Director director = directorStorage.getDirectorById(id);
+            log.info("Получен режиссер с id = {}", id);
+            return director;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("Выполнена попытка получить режиссера по несуществующему id = {}", id);
+            throw new NotFoundException(String.format(Constants.DIRECTOR_NOT_FOUND, id));
+        }
     }
 
     public List<Director> getAllDirectors() {

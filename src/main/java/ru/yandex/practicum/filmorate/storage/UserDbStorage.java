@@ -135,6 +135,14 @@ public class UserDbStorage implements UserStorage {
         }
         String statusName = (status.equals(Status.CONFIRMED) ? "Confirmed" : "Unconfirmed");
 
+        if (status == Status.CONFIRMED) {
+            deleteFriend(userId, friendId);
+        }
+
+        if (status == Status.UNCONFIRMED && isUserContainsFriend(userId, friendId)) {
+            return;
+        }
+
         String sql =
                 "INSERT INTO friends (friend_1_id, friend_2_id, status_id)" +
                         "VALUES (?, ?, (SELECT id FROM statuses WHERE name = ?));";

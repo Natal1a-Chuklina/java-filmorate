@@ -25,7 +25,6 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director getDirectorById(long id) {
         String sqlQuery = "SELECT * FROM DIRECTOR WHERE DIRECTOR_ID = ?";
-        log.info("Получен режиссер с id = {}", id);
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
     }
 

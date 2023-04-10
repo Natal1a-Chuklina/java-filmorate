@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.sql.PreparedStatement;
@@ -25,8 +27,13 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director getDirectorById(long id) {
         String sqlQuery = "SELECT * FROM DIRECTOR WHERE DIRECTOR_ID = ?";
-        log.info("Получен режиссер с id = {}", id);
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
+        try {
+            Director director = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, id);
+            log.info("Получен режиссер с id = {}", id);
+            return director;
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Режиссер с таким id не найден");
+        }
     }
 
     @Override

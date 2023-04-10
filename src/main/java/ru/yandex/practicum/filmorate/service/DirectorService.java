@@ -22,7 +22,6 @@ public class DirectorService {
     }
 
     public Director getDirectorById(long id) {
-        checkDirectorExists(id);
         return directorStorage.getDirectorById(id);
     }
 

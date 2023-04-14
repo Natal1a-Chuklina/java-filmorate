@@ -122,11 +122,26 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public void delete(int userId) {
+        final String sqlQuery = "DELETE FROM users WHERE id = ?";
+        jdbcTemplate.update(sqlQuery, userId);
+        log.info("Пользователь с id {} удален", userId);
+    }
+
+    @Override
     public void addFriend(int userId, int friendId, Status status) {
         if (status == null) {
             return;
         }
         String statusName = (status.equals(Status.CONFIRMED) ? "Confirmed" : "Unconfirmed");
+
+        if (status == Status.CONFIRMED) {
+            deleteFriend(userId, friendId);
+        }
+
+        if (status == Status.UNCONFIRMED && isUserContainsFriend(userId, friendId)) {
+            return;
+        }
 
         String sql =
                 "INSERT INTO friends (friend_1_id, friend_2_id, status_id)" +

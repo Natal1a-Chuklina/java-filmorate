@@ -18,6 +18,8 @@ public interface UserStorage {
 
     void update(User user);
 
+    void delete(int userId);
+
     User getUser(int userId);
 
     void addFriend(int userId, int friendId, Status status);

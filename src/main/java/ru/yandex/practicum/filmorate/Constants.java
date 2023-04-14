@@ -15,6 +15,18 @@ public class Constants {
             "всех данных запроса";
     public static final String FILM_ALREADY_EXISTS_MESSAGE = "Фильм с такими именем, описанием, датой релиза и" +
             " длительностью уже существует";
+    public static final String REVIEW_NOT_FOUND_MESSAGE = "Отзыв с идентификатором %d не найден";
+    public static final String DIRECTOR_NOT_FOUND = "Режиссер с идентификатором %d не найден";
+    public static final String USER_ALREADY_LEFT_REVIEW_FOR_FILM_MESSAGE = "Пользователь с id = %d уже оставлял ревью " +
+            "фильму с id = %d";
+    public static final String USER_ALREADY_LEFT_LIKE_FOR_REVIEW_MESSAGE = "Пользователь с id = %d уже оставлял лайк " +
+            "отзыву с id = %d";
+    public static final String USER_ALREADY_LEFT_DISLIKE_FOR_REVIEW_MESSAGE = "Пользователь с id = %d уже оставлял дизлайк " +
+            "отзыву с id = %d";
+    public static final String USER_DID_NOT_LEAVE_LIKE_FOR_REVIEW_MESSAGE = "Пользователь с id = %d не оставлял лайк " +
+            "отзыву с id = %d";
+    public static final String USER_DID_NOT_LEAVE_DISLIKE_FOR_REVIEW_MESSAGE = "Пользователь с id = %d не оставлял дизлайк " +
+            "отзыву с id = %d";
 
     private Constants() {
     }

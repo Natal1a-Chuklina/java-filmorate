@@ -1,0 +1,2319 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "description": "Documentation \"Filmorate\" API v1.0",
+    "title": "\"Filmorate\" API сервер",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "description": "Generated server url",
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "description": "API для работы с жанрами",
+      "name": "Жанры"
+    },
+    {
+      "description": "API для работы с рейтингами",
+      "name": "Рейтинги"
+    },
+    {
+      "description": "API для работы с пользователями",
+      "name": "Пользователи"
+    },
+    {
+      "description": "API для работы с дружбой",
+      "name": "Дружба"
+    },
+    {
+      "description": "API для работы с режиссерами",
+      "name": "Режиссеры"
+    },
+    {
+      "description": "API для работы с фильмами",
+      "name": "Фильмы"
+    },
+    {
+      "description": "API для работы с рекомендациями",
+      "name": "Рекомендации"
+    },
+    {
+      "description": "API для работы с отзывами",
+      "name": "Отзывы"
+    }
+  ],
+  "paths": {
+    "/genres": {
+      "get": {
+        "operationId": "getAllGenres",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Genre"
+                  },
+                  "description": "Список жанров"
+                }
+              }
+            },
+            "description": "Жанры получены"
+          }
+        },
+        "summary": "Получение всех жанров",
+        "tags": [
+          "Жанры"
+        ]
+      }
+    },
+    "/genres/{genreId}": {
+      "get": {
+        "operationId": "getGenreById",
+        "parameters": [
+          {
+            "description": "id жанра",
+            "in": "path",
+            "name": "genreId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Genre"
+                }
+              }
+            },
+            "description": "Жанр найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Жанр с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Жанр не найден"
+          }
+        },
+        "summary": "Получение жанра по id",
+        "tags": [
+          "Жанры"
+        ]
+      }
+    },
+    "/mpa": {
+      "get": {
+        "operationId": "getAllRatings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mpa"
+                  },
+                  "description": "Список рейтингов"
+                }
+              }
+            },
+            "description": "Рейтинги получены"
+          }
+        },
+        "summary": "Получение всех рейтингов",
+        "tags": [
+          "Рейтинги"
+        ]
+      }
+    },
+    "/mpa/{mpaId}": {
+      "get": {
+        "operationId": "getRatingById",
+        "parameters": [
+          {
+            "description": "id рейтинга",
+            "in": "path",
+            "name": "mpaId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mpa"
+                }
+              }
+            },
+            "description": "Рейтинг найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Рейтинг с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Рейтинг не найден"
+          }
+        },
+        "summary": "Получение рейтинга по id",
+        "tags": [
+          "Рейтинги"
+        ]
+      }
+    },
+    "/directors": {
+      "post": {
+        "operationId": "addDirector",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Director"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Director"
+                }
+              }
+            },
+            "description": "Режиссер создан"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Validation failed for argument [0] in public ru.yandex.practicum.filmorate.model.Director ru.yandex.practicum.filmorate.controller.DirectorController.addDirector(ru.yandex.practicum.filmorate.model.Director): [Field error in object 'director' on field 'name': rejected value [ ]; codes [NotBlank.director.name,NotBlank.name,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [director.name,name]; arguments []; default message [name]]; default message [не должно быть пустым]]"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          }
+        },
+        "summary": "Создание режиссера",
+        "tags": [
+          "Режиссеры"
+        ]
+      },
+      "put": {
+        "operationId": "updateDirector",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Director"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Director"
+                }
+              }
+            },
+            "description": "Режиссер обновлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Validation failed for argument [0] in public ru.yandex.practicum.filmorate.model.Director ru.yandex.practicum.filmorate.controller.DirectorController.updateDirector(ru.yandex.practicum.filmorate.model.Director): [Field error in object 'director' on field 'name': rejected value [ ]; codes [NotBlank.director.name,NotBlank.name,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [director.name,name]; arguments []; default message [name]]; default message [не должно быть пустым]]"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Режиссер с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Режиссер не найден"
+          }
+        },
+        "summary": "Обновление режиссера",
+        "tags": [
+          "Режиссеры"
+        ]
+      },
+      "get": {
+        "operationId": "getAllDirectors",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Director"
+                  },
+                  "description": "Список режиссеров"
+                }
+              }
+            },
+            "description": "Режиссеры получены"
+          }
+        },
+        "summary": "Получение всех режиссеров",
+        "tags": [
+          "Режиссеры"
+        ]
+      }
+    },
+    "/directors/{id}": {
+      "get": {
+        "operationId": "getDirectorById",
+        "parameters": [
+          {
+            "description": "id режиссера",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Director"
+                }
+              }
+            },
+            "description": "Режиссер найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Режиссер с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Режиссер не найден"
+          }
+        },
+        "summary": "Получение режиссера по id",
+        "tags": [
+          "Режиссеры"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteDirector",
+        "parameters": [
+          {
+            "description": "id режиссера",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Режиссер удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Режиссер с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Режиссер не найден"
+          }
+        },
+        "summary": "Удаление режиссера",
+        "tags": [
+          "Режиссеры"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "description": "Обратите внимание: \n - почта должна быть уникальной (Ожидается код ошибки 400)\n - логин должен быть заполнен и не должен содержать пробелов (Ожидается код ошибки 400)\n - если имя не указано, то логин будет использован в качестве имени\n - дата рождения должна быть в прошлом (Ожидается код ошибки 400)",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Пользователь создан"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с почтой ivanov@mail.ru уже существует"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          }
+        },
+        "summary": "Создание пользователя",
+        "tags": [
+          "Пользователи"
+        ]
+      },
+      "put": {
+        "description": "Обратите внимание: \n - почта должна быть уникальной (Ожидается код ошибки 400)\n - логин должен быть заполнен и не должен содержать пробелов (Ожидается код ошибки 400)\n - дата рождения должна быть в прошлом (Ожидается код ошибки 400)",
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Пользователь обновлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Validation failed for argument [0] in public ru.yandex.practicum.filmorate.model.User ru.yandex.practicum.filmorate.controller.UserController.update(ru.yandex.practicum.filmorate.model.User): [Field error in object 'user' on field 'login': rejected value [dolore Update]; codes [Pattern.user.login,Pattern.login,Pattern.java.lang.String,Pattern]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [user.login,login]; arguments []; default message [login],[Ljavax.validation.constraints.Pattern$Flag;@3ff9bcac,^\\\\S+$]; default message [должно соответствовать \\\"^\\\\S+$\\\"]]"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Обновление пользователя",
+        "tags": [
+          "Пользователи"
+        ]
+      },
+      "get": {
+        "operationId": "getAll",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  "description": "Список пользователей"
+                }
+              }
+            },
+            "description": "Пользователи получены"
+          }
+        },
+        "summary": "Получение всех пользователей",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Пользователь найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Получение пользователя по id",
+        "tags": [
+          "Пользователи"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Удаление пользователя",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{id}/feed": {
+      "get": {
+        "operationId": "getHistoryByUserId",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  },
+                  "description": "Список событий"
+                }
+              }
+            },
+            "description": "События получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Получение ленты событий пользователя",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{userId}/friends/{friendId}": {
+      "put": {
+        "description": "Обратите внимание: пользователь не может добавить самого себя в друзья (Ожидается код ошибки 400)",
+        "operationId": "addFriend",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id друга",
+            "in": "path",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь добавлен в друзья"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь не может добавить сам себя в друзья"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Добавление пользователя в друзья",
+        "tags": [
+          "Дружба"
+        ]
+      },
+      "delete": {
+        "description": "Обратите внимание: нельзя удалить из друзей пользователя, который не является другом (Ожидается код ошибки 400)",
+        "operationId": "deleteFriend",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id друга",
+            "in": "path",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь удален из друзей"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователи с id: 2 и 4 не являются друзьями"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Удаление пользователя из друзей",
+        "tags": [
+          "Дружба"
+        ]
+      }
+    },
+    "/users/{userId}/friends": {
+      "get": {
+        "operationId": "getFriendsList",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  "description": "Список друзей"
+                }
+              }
+            },
+            "description": "Друзья получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Получение всех друзей",
+        "tags": [
+          "Дружба"
+        ]
+      }
+    },
+    "/users/{userId}/friends/common/{otherId}": {
+      "get": {
+        "operationId": "getSameFriendsList",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя, общих друзей с которым хотим найти",
+            "in": "path",
+            "name": "otherId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  "description": "Список общих друзей"
+                }
+              }
+            },
+            "description": "Общие друзья получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Получение общих друзей с пользователем",
+        "tags": [
+          "Дружба"
+        ]
+      }
+    },
+    "/films": {
+      "post": {
+        "description": "Обратите внимание: дата релиза должна быть позже 28.12.1895 (Ожидается код ошибки 400)",
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Film"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Фильм создан"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Validation failed for argument [0] in public ru.yandex.practicum.filmorate.model.Film ru.yandex.practicum.filmorate.controller.FilmController.create(ru.yandex.practicum.filmorate.model.Film): [Field error in object 'film' on field 'releaseDate': rejected value [1537-03-25]; codes [StartDateValidation.film.releaseDate,StartDateValidation.releaseDate,StartDateValidation.java.time.LocalDate,StartDateValidation]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [film.releaseDate,releaseDate]; arguments []; default message [releaseDate],28.12.1895]; default message [Дата релиза должна быть позже 28 декабря 1895 года.]]"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Режиссер с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Режиссер не найден"
+          }
+        },
+        "summary": "Создание фильма",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "put": {
+        "description": "Обратите внимание: дата релиза должна быть позже 28.12.1895 (Ожидается код ошибки 400)",
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Film"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Фильм обновлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Validation failed for argument [0] in public ru.yandex.practicum.filmorate.model.Film ru.yandex.practicum.filmorate.controller.FilmController.update(ru.yandex.practicum.filmorate.model.Film): [Field error in object 'film' on field 'name': rejected value [ ]; codes [NotBlank.film.name,NotBlank.name,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [film.name,name]; arguments []; default message [name]]; default message [не должно быть пустым]]"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Фильм с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Фильм не найден"
+          }
+        },
+        "summary": "Обновление фильма",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "get": {
+        "operationId": "getAll",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  },
+                  "description": "Список фильмов"
+                }
+              }
+            },
+            "description": "Фильмы получены"
+          }
+        },
+        "summary": "Получение всех фильмов",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/{filmId}": {
+      "get": {
+        "operationId": "getFilmById",
+        "parameters": [
+          {
+            "description": "id фильма",
+            "in": "path",
+            "name": "filmId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Фильм найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Фильм с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Фильм не найден"
+          }
+        },
+        "summary": "Получение фильма по id",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteFilm",
+        "parameters": [
+          {
+            "description": "id фильма",
+            "in": "path",
+            "name": "filmId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Фильм удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Фильм с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Фильм не найден"
+          }
+        },
+        "summary": "Удаление фильма",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/{filmId}/like/{userId}": {
+      "put": {
+        "operationId": "addLike",
+        "parameters": [
+          {
+            "description": "id фильма",
+            "in": "path",
+            "name": "filmId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Лайк добавлен"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Фильм с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Фильм не найден"
+          }
+        },
+        "summary": "Добавление лайка фильму",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteLike",
+        "parameters": [
+          {
+            "description": "id фильма",
+            "in": "path",
+            "name": "filmId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Лайк у фильма удален"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с id = 3 не ставил лайк фильму с id = 1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Попытка удалить несуществующий лайк"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Фильм с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Фильм не найден"
+          }
+        },
+        "summary": "Удаление лайка у фильма",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/popular": {
+      "get": {
+        "operationId": "getFilteredBestFilms",
+        "parameters": [
+          {
+            "description": "количество фильмов в подборке",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "description": "id жанра",
+            "in": "query",
+            "name": "genreId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "maximum": 6,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "год выпуска фильмов",
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "minimum": 1895,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  },
+                  "description": "Список фильмов"
+                }
+              }
+            },
+            "description": "Фильмы получены"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "getFilteredBestFilms.count: должно быть больше 0"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Id жанра может быть только от 1 до 6"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Жанр не найден"
+          }
+        },
+        "summary": "Получение самых популярных фильмов",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/director/{directorId}": {
+      "get": {
+        "operationId": "getSortedFilmsByDirId",
+        "parameters": [
+          {
+            "description": "id режиссера",
+            "in": "path",
+            "name": "directorId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "тип сортировки",
+            "in": "query",
+            "required": true,
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "year",
+                "likes"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  },
+                  "description": "Список фильмов"
+                }
+              }
+            },
+            "description": "Фильмы получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Режиссер с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Режиссер не найден"
+          }
+        },
+        "summary": "Получение отсортированных фильмов режиссера",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/common": {
+      "get": {
+        "operationId": "getCommonFilms",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "query",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id друга",
+            "in": "query",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  },
+                  "description": "Список фильмов"
+                }
+              }
+            },
+            "description": "Фильмы получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Получение общих любимых фильмов пользователей",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/search": {
+      "get": {
+        "operationId": "getSortedFilmByQuery",
+        "parameters": [
+          {
+            "description": "текст для поиска",
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "тип поиска",
+            "in": "query",
+            "name": "by",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "director",
+                "title",
+                "director,title",
+                "title,director"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  },
+                  "description": "Список фильмов"
+                }
+              }
+            },
+            "description": "Фильмы получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Существует сортировка только по title или director или обоим сразу"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Попытка найти фильм не по названию и/или режиссеру"
+          }
+        },
+        "summary": "Поиск фильмов по названию и/или режиссеру",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/users/{userId}/recommendations": {
+      "get": {
+        "operationId": "getRecommendations",
+        "parameters": [
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  },
+                  "description": "Список фильмов"
+                }
+              }
+            },
+            "description": "Фильмы получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Получение рекомендаций по фильмам",
+        "tags": [
+          "Рекомендации"
+        ]
+      }
+    },
+    "/reviews": {
+      "post": {
+        "description": "Обратите внимание: пользователь может оставить отзыв на фильм только один раз (Ожидается код ошибки 400)",
+        "operationId": "createReview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": "Отзыв создан"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с id = 2 уже оставлял ревью фильму с id = 1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Попытка повторно оставить отзыв на фильм"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Пользователь не найден"
+          }
+        },
+        "summary": "Создание отзыва",
+        "tags": [
+          "Отзывы"
+        ]
+      },
+      "put": {
+        "operationId": "updateReview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Review"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": "Отзыв обновлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Validation failed for argument [0] in public ru.yandex.practicum.filmorate.model.Review ru.yandex.practicum.filmorate.controller.ReviewController.updateReview(ru.yandex.practicum.filmorate.model.Review): [Field error in object 'review' on field 'isPositive': rejected value [null]; codes [NotNull.review.isPositive,NotNull.isPositive,NotNull.java.lang.Boolean,NotNull]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [review.isPositive,isPositive]; arguments []; default message [isPositive]]; default message [не должно равняться null]]1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Отзыв с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Отзыв не найден"
+          }
+        },
+        "summary": "Обновление отзыва",
+        "tags": [
+          "Отзывы"
+        ]
+      },
+      "get": {
+        "operationId": "getReviewsByFilmIdOrGetAll",
+        "parameters": [
+          {
+            "description": "id фильма",
+            "in": "query",
+            "name": "filmId",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "количество отзывов в подборке",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  },
+                  "description": "Список отзывов"
+                }
+              }
+            },
+            "description": "Отзывы получены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Фильм с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Фильм не найден"
+          }
+        },
+        "summary": "Получение всех отзывов или отзывов по фильму",
+        "tags": [
+          "Отзывы"
+        ]
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "operationId": "getReviewById",
+        "parameters": [
+          {
+            "description": "id отзыва",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            },
+            "description": "Отзыв найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Отзыв с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Отзыв не найден"
+          }
+        },
+        "summary": "Получение отзыва по id",
+        "tags": [
+          "Отзывы"
+        ]
+      },
+      "delete": {
+        "operationId": "removeReview",
+        "parameters": [
+          {
+            "description": "id отзыва",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Отзыв удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Отзыв с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Отзыв не найден"
+          }
+        },
+        "summary": "Удаление отзыва",
+        "tags": [
+          "Отзывы"
+        ]
+      }
+    },
+    "/reviews/{id}/like/{userId}": {
+      "put": {
+        "description": "Обратите внимание: \n - поставить лайк отзыву можно только один раз \n - если уже есть дизлайк от пользователя на этот отзыв, то при добавлении лайка дизлайк будет удален",
+        "operationId": "addLikeToReview",
+        "parameters": [
+          {
+            "description": "id отзыва",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Лайк добавлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с id = 2 уже оставлял лайк отзыву с id = 1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Попытка повторно оставить лайк отзыву"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Отзыв с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Отзыв не найден"
+          }
+        },
+        "summary": "Добавление лайка отзыву",
+        "tags": [
+          "Отзывы"
+        ]
+      },
+      "delete": {
+        "operationId": "removeLikeOfReview",
+        "parameters": [
+          {
+            "description": "id отзыва",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Лайк у отзыва удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с id = 2 не оставлял лайк отзыву с id = 1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Лайк не найден"
+          }
+        },
+        "summary": "Удаление лайка у отзыва",
+        "tags": [
+          "Отзывы"
+        ]
+      }
+    },
+    "/reviews/{id}/dislike/{userId}": {
+      "put": {
+        "description": "Обратите внимание: \n - поставить дизлайк отзыву можно только один раз \n - если уже есть лайк от пользователя на этот отзыв, то при добавлении дизлайка лайк будет удален",
+        "operationId": "addDislikeToReview",
+        "parameters": [
+          {
+            "description": "id отзыва",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Дизлайк добавлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с id = 2 уже оставлял дизлайк отзыву с id = 1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Попытка повторно оставить дизлайк отзыву"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Отзыв с идентификатором 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Отзыв не найден"
+          }
+        },
+        "summary": "Добавление дизлайка отзыву",
+        "tags": [
+          "Отзывы"
+        ]
+      },
+      "delete": {
+        "operationId": "removeDislikeOfReview",
+        "parameters": [
+          {
+            "description": "id отзыва",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "description": "id пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Дизлайк у отзыва удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Пользователь с id = 2 не оставлял дизлайк отзыву с id = 1"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Дизлайк не найден"
+          }
+        },
+        "summary": "Удаление дизлайка у отзыва",
+        "tags": [
+          "Отзывы"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Director": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Имя режиссера",
+            "example": "Гай Ричи"
+          }
+        },
+        "description": "Режиссер"
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errorMessage": {
+            "type": "string",
+            "description": "Сообщение об ошибке",
+            "example": "Пользователь с почтой user@user.com уже существует"
+          }
+        },
+        "description": "Сведения об ошибке"
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "example": 1
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Время события",
+            "format": "int64",
+            "example": 123344556
+          },
+          "userId": {
+            "type": "integer",
+            "description": "Идентификатор пользователя",
+            "format": "int32",
+            "example": 1
+          },
+          "entityId": {
+            "type": "integer",
+            "description": "Идентификатор сущности, с которой произошло событие",
+            "format": "int32",
+            "example": 2
+          },
+          "eventType": {
+            "type": "string",
+            "description": "Тип события",
+            "example": "FRIEND",
+            "enum": [
+              "LIKE",
+              "REVIEW",
+              "FRIEND"
+            ]
+          },
+          "operation": {
+            "type": "string",
+            "description": "Тип действия",
+            "example": "ADD",
+            "enum": [
+              "REMOVE",
+              "ADD",
+              "UPDATE"
+            ]
+          }
+        },
+        "description": "Событие"
+      },
+      "Film": {
+        "required": [
+          "name",
+          "releaseDate",
+          "duration",
+          "mpa"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Название фильма",
+            "example": "Карты, деньги, два ствола"
+          },
+          "description": {
+            "type": "string",
+            "maximum": 200,
+            "description": "Описание фильма",
+            "example": "Четверке друзей из Лондона нужно где-то найти 500 000 фунтов. Культовая черная комедия, дебют Гая Ричи."
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "Дата выпуска фильма в формате yyyy-MM-dd",
+            "example": "1998-08-23"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Длительность фильма",
+            "format": "int32",
+            "example": 107
+          },
+          "mpa": {
+            "$ref": "#/components/schemas/Mpa"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            },
+            "description": "Список жанров"
+          },
+          "likes": {
+            "type": "array",
+            "readOnly": true,
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "example": 1
+            },
+            "description": "Id пользователей"
+          },
+          "directors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Director"
+            },
+            "description": "Список режиссеров"
+          }
+        },
+        "description": "Фильм"
+      },
+      "Friend": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "example": 2
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус дружбы",
+            "example": "CONFIRMED",
+            "enum": [
+              "CONFIRMED",
+              "UNCONFIRMED"
+            ]
+          }
+        },
+        "description": "Друг"
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 6,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Название жанра",
+            "example": "Комедия"
+          }
+        },
+        "description": "Жанр"
+      },
+      "Mpa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Название рейтинга",
+            "example": "G"
+          }
+        },
+        "description": "Рейтинг"
+      },
+      "Review": {
+        "type": "object",
+        "required": [
+          "content",
+          "isPositive",
+          "userId",
+          "filmId"
+        ],
+        "properties": {
+          "reviewId": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "example": 1
+          },
+          "content": {
+            "type": "string",
+            "description": "Содержание отзыва",
+            "example": "Интересный, динамичный фильм"
+          },
+          "isPositive": {
+            "type": "boolean",
+            "description": "Является ли отзыв положительным",
+            "example": true
+          },
+          "userId": {
+            "type": "integer",
+            "description": "Id пользователя",
+            "format": "int32",
+            "example": 1
+          },
+          "filmId": {
+            "type": "integer",
+            "description": "Id фильма",
+            "format": "int32",
+            "example": 1
+          },
+          "useful": {
+            "readOnly": true,
+            "type": "integer",
+            "description": "Рейтинг полезности ",
+            "format": "int32",
+            "example": 10
+          }
+        },
+        "description": "Отзыв на фильм"
+      },
+      "User": {
+        "required": [
+          "login",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int32",
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "description": "Почтовый адрес",
+            "example": "petrov.i@mail.ru"
+          },
+          "login": {
+            "type": "string",
+            "description": "Логин",
+            "example": "petrov.i"
+          },
+          "name": {
+            "type": "string",
+            "description": "Имя",
+            "example": "Петров Иван"
+          },
+          "birthday": {
+            "type": "string",
+            "description": "Дата рождения в формате yyyy-MM-dd",
+            "example": "1995-08-20"
+          },
+          "friends": {
+            "type": "array",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/Friend"
+            },
+            "description": "Список друзей"
+          }
+        },
+        "description": "Пользователь"
+      }
+    }
+  }
+}
